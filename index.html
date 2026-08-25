@@ -48,6 +48,18 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .f-group input{border:1.5px solid #e2e8f0;background:#fff;border-radius:12px;padding:9px 12px;font-family:'Cairo';font-size:13px;font-weight:700}
 .chip{background:#eef2ff;color:#4f46e5;border-radius:999px;padding:9px 14px;font-size:11px;font-weight:800}
 .chip.day{background:#fffbeb;color:#d97706}
+/* ✅ شريط اختيار سريع مرتّب وبسيط */
+.quick-range{display:flex;gap:8px;overflow-x:auto;width:100%;padding:8px 2px 2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.quick-range::-webkit-scrollbar{display:none}
+.qr-chip{flex-shrink:0;border:1.5px solid #e2e8f0;background:#fff;border-radius:999px;padding:8px 16px;font-family:'Cairo';font-size:11px;font-weight:800;color:#475569;cursor:pointer;transition:.15s}
+.qr-chip:hover{border-color:#c7d2fe;color:#4f46e5}
+.qr-chip.on{background:#4f46e5;color:#fff;border-color:#4f46e5;box-shadow:0 4px 12px rgba(79,70,229,.3)}
+/* ✅ طيّ قائمة المستودع */
+#repoCard.collapsed{padding:10px 16px}
+#repoCard.collapsed #repoList{display:none}
+#repoToggle{width:30px;height:30px;padding:0;justify-content:center}
+#repoToggle i{transition:.3s}
+#repoCard.collapsed #repoToggle i{transform:rotate(180deg)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}
 .kpi{background:#f8f9fd;border-radius:18px;box-shadow:0 8px 24px rgba(15,23,42,.06);padding:14px;position:relative;overflow:hidden}
 .kpi::after{content:'';position:absolute;inset-inline-end:0;top:12px;bottom:12px;width:4px;border-radius:4px;background:var(--c)}
@@ -129,7 +141,10 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
   </section>
 
   <section class="card hidden" id="repoCard">
-    <div class="card-head"><h2><i class="fa-brands fa-github"></i> ملفات المستودع (اضغط فتح ثم حفظ)</h2></div>
+    <div class="card-head">
+      <h2><i class="fa-brands fa-github"></i> ملفات المستودع (اضغط فتح ثم حفظ)</h2>
+      <button class="btn btn-sm btn-ghost" id="repoToggle" title="إظهار/إخفاء"><i class="fa-solid fa-chevron-up"></i></button>
+    </div>
     <div id="repoList" class="file-list"></div>
   </section>
 
@@ -142,6 +157,7 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
       <span class="chip" id="rangeChip"></span>
       <span class="chip" id="fileChip" style="background:#ecfdf5;color:#059669"></span>
     </div>
+    <div class="quick-range" id="quickRange"></div>
   </section>
 
   <section class="kpis hidden" id="kpis">
@@ -239,6 +255,7 @@ const rawUrl=n=>'https://raw.githubusercontent.com/'+REPO+'/main/'+encodeURI(n);
 
 let RAW=null, CURRENT=null, CHART=null;
 let chartFrom=null, chartTo=null, selectedDay=null, selectedMonth=null;
+let repoTimer=null;
 
 function idbOpen(){return new Promise((res,rej)=>{const q=indexedDB.open('asbakk-db',1);q.onupgradeneeded=()=>{const db=q.result;if(!db.objectStoreNames.contains('files'))db.createObjectStore('files',{keyPath:'id'});};q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});}
 async function idbAll(){const db=await idbOpen();return new Promise((res,rej)=>{const r=db.transaction('files','readonly').objectStore('files').getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error);});}
@@ -256,7 +273,6 @@ function rowsFrom(ws){if(!ws)return[];return XLSX.utils.sheet_to_json(ws,{defval
 function wbToRAW(wb){
   let allRows=[];
   wb.SheetNames.forEach(n=>{const ws=wb.Sheets[n];if(ws)allRows=allRows.concat(rowsFrom(ws));});
-  /* ✅ إزالة القيود المكررة تماماً (تظهر في أكثر من ورقة أو مكررة بنفس الملف) */
   const seen=new Set();
   allRows=allRows.filter(r=>{
     const k=[r.date?iso(r.date):'',r.voucher,r.type,r.debit,r.credit,r.stmt,r.acc].join('|');
@@ -311,17 +327,43 @@ function computeDaily(from,to){
 function fullRange(){let min=null,max=null;for(const k in RAW)(RAW[k]||[]).forEach(r=>{if(!min||r.date<min)min=r.date;if(!max||r.date>max)max=r.date;});return[min,max];}
 function anim(el,val){const t0=performance.now();(function st(t){const p=Math.min(1,(t-t0)/800),e=1-Math.pow(1-p,3);el.textContent=fmt(val*e);if(p<1)requestAnimationFrame(st);})(t0);}
 
-/* ✅ الأشهر داخل الفترة الحالية */
-function monthsInRange(){
-  const out=[];if(!chartFrom||!chartTo)return out;
-  const d=new Date(chartFrom.getFullYear(),chartFrom.getMonth(),1);
-  while(d<=chartTo&&out.length<60){
+function monthsBetween(from,to){
+  const out=[];if(!from||!to)return out;
+  const d=new Date(from.getFullYear(),from.getMonth(),1);
+  while(d<=to&&out.length<60){
     out.push({key:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'),from:new Date(d),to:new Date(d.getFullYear(),d.getMonth()+1,0,23,59,59)});
     d.setMonth(d.getMonth()+1);
   }
   return out;
 }
+function monthsInRange(){return monthsBetween(chartFrom,chartTo);}
 function isMonthMode(){return monthsInRange().length>1;}
+
+/* ✅ إظهار/طيّ قائمة المستودع مع إخفاء تلقائي بعد 3 ثوانٍ */
+function repoShow(auto){
+  const c=$('#repoCard');c.classList.remove('hidden');c.classList.remove('collapsed');
+  clearTimeout(repoTimer);
+  if(auto)repoTimer=setTimeout(()=>c.classList.add('collapsed'),3000);
+}
+
+/* ✅ شريط الاختيار السريع المرتّب */
+function renderQuick(){
+  const box=$('#quickRange');if(!box||!RAW)return;
+  const[mn,mx]=fullRange();if(!mn)return;
+  box.innerHTML='';
+  const full=document.createElement('button');
+  full.className='qr-chip'+(iso(chartFrom)===iso(mn)&&iso(chartTo)===iso(mx)?' on':'');
+  full.textContent='الفترة كاملة';
+  full.onclick=()=>resetRange();
+  box.appendChild(full);
+  monthsBetween(mn,mx).forEach(m=>{
+    const b=document.createElement('button');
+    b.className='qr-chip'+(iso(chartFrom)===iso(m.from)&&iso(chartTo)===iso(m.to)?' on':'');
+    b.textContent=m.key;
+    b.onclick=()=>{chartFrom=m.from;chartTo=m.to;selectedDay=null;selectedMonth=null;$('#dFrom').value=iso(m.from);$('#dTo').value=iso(m.to);renderAll();};
+    box.appendChild(b);
+  });
+}
 
 function detailItem(name,icon,rows,net,income){
   const sumD=rows.reduce((s,r)=>s+r.debit,0),sumC=rows.reduce((s,r)=>s+r.credit,0);
@@ -363,7 +405,7 @@ function renderAll(){
   else if(selMKey){rc.textContent='📅 شهر محدد: '+selMKey;rc.classList.add('day');}
   else{rc.textContent='الفترة: '+iso(chartFrom)+' ← '+iso(chartTo);rc.classList.remove('day');}
   $('#fileChip').textContent='الملف: '+CURRENT.name;
-  renderChart(selKey,selMKey);renderDayButtonState(selKey,selMKey);
+  renderChart(selKey,selMKey);renderDayButtonState(selKey,selMKey);renderQuick();
   const box=$('#expList');box.innerHTML='';
   CATS.map(c=>st.catMap[c[0]]).sort((a,b)=>b.amt-a.amt).forEach(c=>{
     box.appendChild(detailItem(c.name,c.icon,c.rows,c.amt,false));
@@ -419,7 +461,6 @@ function renderDayButtonState(selKey,selMKey){
   if(selKey||selMKey){btn.classList.add('on');btn.title=selKey?('اليوم: '+selKey):('الشهر: '+selMKey);}
   else{btn.classList.remove('on');btn.title='اختر فترة';}
 }
-/* ✅ القائمة لا تختفي تلقائياً — وتعرض أشهراً مرتبة عند الفترات الكبيرة */
 function openPop(){
   if(!chartFrom||!chartTo)return;
   const grid=$('#dayGrid');grid.innerHTML='';
@@ -451,6 +492,10 @@ function closePop(){$('#dayPop').classList.remove('open');}
 $('#dayBtn').onclick=e=>{e.stopPropagation();const p=$('#dayPop');if(p.classList.contains('open'))closePop();else openPop();};
 $('#dayClear').onclick=e=>{e.stopPropagation();if(selectedDay||selectedMonth){selectedDay=null;selectedMonth=null;$('#dFrom').value=iso(chartFrom);$('#dTo').value=iso(chartTo);toast('تم إلغاء التحديد');renderAll();}closePop();};
 document.addEventListener('click',e=>{const p=$('#dayPop'),b=$('#dayBtn');if(p&&p.classList.contains('open')&&!p.contains(e.target)&&!b.contains(e.target))closePop();});
+
+/* ✅ زر السهم لقائمة المستودع + لمس القائمة يلغي الإخفاء التلقائي */
+$('#repoToggle').onclick=e=>{e.stopPropagation();clearTimeout(repoTimer);$('#repoCard').classList.toggle('collapsed');};
+$('#repoCard').addEventListener('pointerdown',()=>clearTimeout(repoTimer));
 
 async function renderLocal(){
   const items=(await idbAll()).sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||''));
@@ -496,7 +541,8 @@ async function refreshRepo(){
     }catch(e){apiFailed=true;}
   }
   if(!items.length)items=await probeKnown();
-  const box=$('#repoList');$('#repoCard').classList.remove('hidden');
+  const box=$('#repoList');
+  repoShow(true);   /* ✅ تظهر ثم تنطوي بعد 3 ثوانٍ ويبقى السهم */
   if(!items.length){
     box.innerHTML='<div class="empty">'+(apiFailed?'تعذّر الاتصال بالمستودع (حد الطلبات) — أعد المحاولة بعد دقيقة':'لا توجد ملفات Excel في المستودع')+'</div>';
     ovHide();return[];
