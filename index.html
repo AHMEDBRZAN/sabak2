@@ -29,12 +29,13 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .collapse-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .45s ease}
 .collapsed .collapse-body{grid-template-rows:0fr}
 .collapse-inner{overflow:hidden}
-.tgl{width:30px;height:30px;padding:0;justify-content:center}
+.tgl{width:30px;height:30px;padding:0;justify-content:center;position:relative;z-index:2}
 .tgl i{transition:.3s}
 .collapsed .tgl i{transform:rotate(180deg)}
 .collapsed{padding:10px 16px}
-/* ✅ الهيدر الجديد: جميل وتفاعلي */
+/* ✅ الهيدر */
 .top-card{background:linear-gradient(135deg,#eef2ff 0%,#fdf4ff 55%,#ecfeff 100%);border:1px solid #e0e7ff;position:relative;overflow:hidden}
+.top-card::before,.top-card::after{pointer-events:none}   /* ✅ إصلاح زر الفتح */
 .top-card::before{content:'';position:absolute;top:-50px;inset-inline-start:-50px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(79,70,229,.16),transparent 70%)}
 .top-card::after{content:'';position:absolute;bottom:-60px;inset-inline-end:-40px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(14,165,233,.14),transparent 70%)}
 .top-card .brand{display:flex;gap:10px;align-items:center;position:relative;z-index:1}
@@ -49,10 +50,13 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .fi-icon{width:42px;height:42px;border-radius:12px;background:#ecfdf5;color:#059669;display:grid;place-items:center;font-size:18px;flex-shrink:0}
 .fi-icon.repo{background:#eef2ff;color:#4f46e5}
 .fi-info{flex:1;min-width:0}
-.fi-info b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fi-info span{font-size:10.5px;color:#64748b}
-.fi-mini{display:flex;gap:10px;flex-wrap:wrap;font-size:10px;color:#475569;margin-top:4px}
-.fi-mini em{font-style:normal}.fi-mini b{display:inline;color:#059669}
+.fi-info b{display:block;font-size:13px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ✅ شارات مرتبة: تاريخ آخر حفظ + صافي الربح فقط */
+.fi-mini{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.fi-mini .bd{font-style:normal;display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 11px;font-size:10px;font-weight:800}
+.bd.date{background:#eef2ff;color:#4f46e5}
+.bd.net{background:#ecfdf5;color:#059669}
+.bd.net.neg{background:#fee2e2;color:#dc2626}
 .fi-actions{display:flex;gap:6px;flex-shrink:0}
 .empty{color:#94a3b8;font-size:12px;text-align:center;padding:14px}
 .sel{border:1.5px solid #e2e8f0;background:#fff;border-radius:12px;padding:9px 14px;font-family:'Cairo';font-size:13px;font-weight:800;color:#0f172a;cursor:pointer}
@@ -63,7 +67,6 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .kpi .ic{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.7);color:var(--c);display:grid;place-items:center;font-size:14px;box-shadow:inset 0 0 0 1.5px var(--c)}
 .kpi .v{font-size:18px;font-weight:900;margin-top:8px}
 .kpi .s{font-size:9.5px;color:#94a3b8;font-weight:700}
-/* ✅ قائمة الدخل: ترتيب عمودي + جماليات */
 .stmt{margin-top:12px;display:flex;flex-direction:column;gap:7px}
 .stmt .row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff;border:1px solid #eef1f8;border-radius:14px;padding:10px 14px;font-size:12.5px;font-weight:800;position:relative;overflow:hidden;transition:.2s}
 .stmt .row::before{content:'';position:absolute;inset-inline-start:0;top:8px;bottom:8px;width:4px;border-radius:4px;background:var(--rc,#94a3b8)}
@@ -128,12 +131,11 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 <div id="overlay"><div class="spin"></div><p id="ovText">جارٍ التحميل…</p></div>
 
 <main>
-  <!-- ✅ الهيدر: جميل + محتوى مخفي + سهم + إغلاق بعد 3 ثوانٍ -->
   <section class="card top-card collapsed" id="topCard">
     <div class="card-head">
       <div class="brand">
         <div class="logo"><i class="fa-solid fa-chart-line"></i></div>
-        <div><h1>إدارة الحسابات — شركة فاوري</h1><small>المستودع: ahmedbrzan/sabak2</small></div>
+        <div><h1>إدارة الحسابات — شركة فاوري</h1><small>المبرمج: أحمد برزان</small></div>
       </div>
       <button class="btn btn-sm btn-ghost tgl" id="topToggle" title="إظهار/إخفاء"><i class="fa-solid fa-chevron-down"></i></button>
     </div>
@@ -278,7 +280,6 @@ function rowsFrom(ws){if(!ws)return[];return XLSX.utils.sheet_to_json(ws,{defval
 function wbToRAW(wb){
   let allRows=[];
   wb.SheetNames.forEach(n=>{const ws=wb.Sheets[n];if(ws)allRows=allRows.concat(rowsFrom(ws));});
-  /* ✅ إزالة القيود المكررة تماماً */
   const seen=new Set();
   allRows=allRows.filter(r=>{
     const k=[r.date?iso(r.date):'',r.voucher,r.type,r.debit,r.credit,r.stmt,r.acc].join('|');
@@ -345,7 +346,6 @@ function monthsBetween(from,to){
 function monthsInRange(){return monthsBetween(chartFrom,chartTo);}
 function isMonthMode(){return monthsInRange().length>1;}
 
-/* ✅ الهيدر: فتح + إغلاق تلقائي بعد 3 ثوانٍ */
 function topExpand(){
   const c=$('#topCard');c.classList.remove('collapsed');
   clearTimeout(topTimer);
@@ -491,6 +491,7 @@ $('#monthSel').onchange=e=>{
   if(v==='all')resetRange();else setMonth(v);
 };
 
+/* ✅ بطاقة ملف مرتبة: الاسم + تاريخ آخر حفظ + صافي الربح فقط */
 async function renderLocal(){
   const items=(await idbAll()).sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||''));
   const box=$('#localList');
@@ -498,10 +499,12 @@ async function renderLocal(){
   box.innerHTML='';
   items.forEach(it=>{
     const m=it.meta||{};
+    const net=isFinite(m.net)?m.net:0;
     const el=document.createElement('div');el.className='file-item';
     el.innerHTML='<div class="fi-icon"><i class="fa-solid fa-file-excel"></i></div>'+
-    '<div class="fi-info"><b>'+it.name+'</b><span>حُفظ: '+new Date(it.savedAt).toLocaleString('ar-IQ')+'</span>'+
-    '<div class="fi-mini"><em>سجلات: <b>'+((m.counts&&(m.counts.s+m.counts.r+m.counts.d+m.counts.c+m.counts.e+m.counts.oi+m.counts.en))||0)+'</b></em><em>مبيعات: <b>'+fmt(m.sales)+'</b></em><em>تكلفة: <b>'+fmt(m.cogs)+'</b></em><em>إيرادات: <b>'+fmt(m.otherIncome)+'</b></em><em>صافي: <b>'+fmt(m.net)+'</b></em></div></div>'+
+    '<div class="fi-info"><b>'+it.name+'</b>'+
+    '<div class="fi-mini"><em class="bd date"><i class="fa-regular fa-clock"></i> '+new Date(it.savedAt).toLocaleString('ar-IQ')+'</em>'+
+    '<em class="bd net'+(net<0?' neg':'')+'"><i class="fa-solid fa-sack-dollar"></i> صافي: '+fmt(net)+'</em></div></div>'+
     '<div class="fi-actions"><button class="btn btn-sm btn-ghost" data-open="'+it.id+'"><i class="fa-solid fa-folder-open"></i> فتح</button><button class="btn btn-sm btn-danger" data-del="'+it.id+'"><i class="fa-solid fa-trash"></i></button></div>';
     box.appendChild(el);
   });
@@ -544,7 +547,7 @@ async function refreshRepo(){
   box.innerHTML='';
   items.forEach(f=>{
     const el=document.createElement('div');el.className='file-item';
-    el.innerHTML='<div class="fi-icon repo"><i class="fa-brands fa-github"></i></div><div class="fi-info"><b>'+f.name+'</b><span>'+(f.size?(f.size/1048576).toFixed(2)+' MB':'')+'</span></div><div class="fi-actions"><button class="btn btn-sm btn-indigo" data-url="'+f.download_url+'" data-n="'+f.name+'"><i class="fa-solid fa-download"></i> فتح</button></div>';
+    el.innerHTML='<div class="fi-icon repo"><i class="fa-brands fa-github"></i></div><div class="fi-info"><b>'+f.name+'</b></div><div class="fi-actions"><button class="btn btn-sm btn-indigo" data-url="'+f.download_url+'" data-n="'+f.name+'"><i class="fa-solid fa-download"></i> فتح</button></div>';
     box.appendChild(el);
   });
   box.querySelectorAll('[data-url]').forEach(b=>b.onclick=async()=>{ov('جارٍ تنزيل الملف من المستودع…');await openURL(b.dataset.url,b.dataset.n);});
