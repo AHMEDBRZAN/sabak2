@@ -93,14 +93,15 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .day-btn:hover{border-color:#c7d2fe;color:#4f46e5;background:#f5f8ff}
 .day-btn.on{border-color:#f59e0b;background:#fffbeb;color:#d97706;box-shadow:0 4px 12px rgba(245,158,11,.25)}
 .day-btn.on::after{content:'';position:absolute;top:-2px;inset-inline-end:-2px;width:8px;height:8px;background:#f59e0b;border-radius:50%;border:2px solid #fff}
-.day-pop{position:absolute;top:calc(100% + 8px);inset-inline-end:0;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 16px 40px rgba(15,23,42,.18);padding:12px;z-index:50;width:260px;opacity:0;transform:translateY(-8px) scale(.96);pointer-events:none;transition:all .25s cubic-bezier(.4,0,.2,1)}
+.day-pop{position:absolute;top:calc(100% + 8px);inset-inline-end:0;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 16px 40px rgba(15,23,42,.18);padding:12px;z-index:50;width:280px;opacity:0;transform:translateY(-8px) scale(.96);pointer-events:none;transition:all .25s cubic-bezier(.4,0,.2,1)}
 .day-pop.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
 .day-pop-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px dashed #e2e8f0;margin-bottom:8px}
 .day-pop-head span{font-size:11px;font-weight:800;color:#4f46e5}
 .day-pop-head button{border:none;background:#f1f5f9;color:#64748b;font-family:'Cairo';font-size:10px;font-weight:800;padding:4px 10px;border-radius:8px;cursor:pointer;transition:.2s}
 .day-pop-head button:hover{background:#fee2e2;color:#dc2626}
-.day-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:180px;overflow:auto}
-.day-cell{border:none;background:#f1f5f9;border-radius:9px;padding:7px 0;font-family:'Cairo';font-size:11px;font-weight:800;color:#334155;cursor:pointer;transition:.15s}
+.day-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:220px;overflow:auto}
+.day-grid.months{grid-template-columns:repeat(3,1fr)}
+.day-cell{border:none;background:#f1f5f9;border-radius:9px;padding:8px 0;font-family:'Cairo';font-size:11px;font-weight:800;color:#334155;cursor:pointer;transition:.15s}
 .day-cell:hover{background:#e2e8f0}
 .day-cell.on{background:#f59e0b;color:#fff;box-shadow:0 3px 8px rgba(245,158,11,.4)}
 .day-pop-empty{grid-column:1/-1;text-align:center;font-size:11px;color:#94a3b8;padding:12px 0}
@@ -179,17 +180,17 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
       <div class="card-head">
         <h2><i class="fa-solid fa-chart-column"></i> الحركة اليومية (مبيعات / مصاريف)</h2>
         <div class="day-picker">
-          <button class="day-btn" id="dayBtn" title="اختر يوم"><i class="fa-regular fa-calendar"></i></button>
+          <button class="day-btn" id="dayBtn" title="اختر فترة"><i class="fa-regular fa-calendar"></i></button>
           <div class="day-pop" id="dayPop">
             <div class="day-pop-head">
-              <span>اختر يوماً محدداً</span>
+              <span id="popTitle">اختر يوماً محدداً</span>
               <button id="dayClear">إلغاء</button>
             </div>
             <div class="day-grid" id="dayGrid"></div>
           </div>
         </div>
       </div>
-      <p class="hint"><i class="fa-solid fa-hand-pointer"></i> انقر على عمود اليوم بالرسم أو اختر من الأيقونة 📅</p>
+      <p class="hint"><i class="fa-solid fa-hand-pointer"></i> انقر على عمود بالرسم أو اختر من 📅 — للفترات الكبيرة تظهر الأشهر</p>
       <div style="height:280px;margin-top:10px"><canvas id="chart"></canvas></div>
     </section>
   </div>
@@ -223,7 +224,6 @@ function deepNorm(s){
 const KW=k=>deepNorm(k);
 const K_WITH=KW('مسحوبات'),K_EARN=KW('مكتسب'),K_TAD=KW('تدوير'),K_RET=KW('مردودات'),K_SALES=KW('المبيعات'),K_DISC=KW('الحسم'),K_COGS=KW('تكلفة البضاعة'),K_INC=KW('ايرادات');
 
-/* ✅ أُضيفت فئة: ديون معدومة */
 const CATS=[["ايجار بناية","fa-building"],["كهرباء","fa-bolt"],["اشتراك مولد","fa-plug-circle-bolt"],["مصاريف مختلفة","fa-shapes"],["شراء ماء للمحل","fa-droplet"],["شراء قرطاسية متنوعة","fa-pen-ruler"],["شراء منظفات","fa-soap"],["شراء علاليك","fa-box-archive"],["مشتريات المحل","fa-cart-shopping"],["مكافئات تشجيعية","fa-gift"],["اجور نقل","fa-truck-fast"],["مشروبات ساخنة","fa-mug-hot"],["صيانة","fa-screwdriver-wrench"],["اعانة محتاجين","fa-hand-holding-heart"],["عمولة حوالات الشركات","fa-money-bill-transfer"],["زيادة ونقص صندوق","fa-scale-unbalanced"],["اجور الموظفين","fa-users"],["طعام الموظفين","fa-utensils"],["مصاريف تسويق وتطوير","fa-bullhorn"],["ايجار المخزن الخارجي","fa-warehouse"],["اجور توصيل البضاعة","fa-truck"],["اعلام ونشر الشركة","fa-rectangle-ad"],["لاجور تنزيل بضاعة","fa-boxes-stacked"],["عملات نقدية تالفة","fa-money-bill-wave"],["ديون معدومة","fa-ban"]];
 const CATLOOK={};CATS.forEach(c=>CATLOOK[deepNorm(c[0])]=c[0]);
 const ALIASMAP={};[['طعامموظفين','طعام الموظفين'],['اجورتوصيلبضاعة','اجور توصيل البضاعة'],['اجورتنزيلبضاعة','لاجور تنزيل بضاعة'],['اجورتنزيلبضاعه','لاجور تنزيل بضاعة'],['عملاتنقديهتالفه','عملات نقدية تالفة'],['ديونمعدومه','ديون معدومة']].forEach(p=>ALIASMAP[deepNorm(p[0])]=p[1]);
@@ -238,8 +238,7 @@ const KNOWN_FILES=[
 const rawUrl=n=>'https://raw.githubusercontent.com/'+REPO+'/main/'+encodeURI(n);
 
 let RAW=null, CURRENT=null, CHART=null;
-let chartFrom=null, chartTo=null, selectedDay=null;
-let popCloseTimer=null;
+let chartFrom=null, chartTo=null, selectedDay=null, selectedMonth=null;
 
 function idbOpen(){return new Promise((res,rej)=>{const q=indexedDB.open('asbakk-db',1);q.onupgradeneeded=()=>{const db=q.result;if(!db.objectStoreNames.contains('files'))db.createObjectStore('files',{keyPath:'id'});};q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});}
 async function idbAll(){const db=await idbOpen();return new Promise((res,rej)=>{const r=db.transaction('files','readonly').objectStore('files').getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error);});}
@@ -257,6 +256,13 @@ function rowsFrom(ws){if(!ws)return[];return XLSX.utils.sheet_to_json(ws,{defval
 function wbToRAW(wb){
   let allRows=[];
   wb.SheetNames.forEach(n=>{const ws=wb.Sheets[n];if(ws)allRows=allRows.concat(rowsFrom(ws));});
+  /* ✅ إزالة القيود المكررة تماماً (تظهر في أكثر من ورقة أو مكررة بنفس الملف) */
+  const seen=new Set();
+  allRows=allRows.filter(r=>{
+    const k=[r.date?iso(r.date):'',r.voucher,r.type,r.debit,r.credit,r.stmt,r.acc].join('|');
+    if(seen.has(k))return false;
+    seen.add(k);return true;
+  });
   let fb=null;allRows.forEach(r=>{if(r.date&&(!fb||r.date<fb))fb=r.date;});
   allRows.forEach(r=>{if(!r.date)r.date=fb||new Date();});
   const res={sales:[],returns:[],discounts:[],cogs:[],otherIncome:[],expenses:[],earned:[]};
@@ -270,7 +276,7 @@ function wbToRAW(wb){
     if(a.includes(K_DISC)){res.discounts.push(r);return;}
     if(a.includes(K_COGS)){res.cogs.push(r);return;}
     if(a.includes(K_INC)){res.otherIncome.push(r);return;}
-    if(catKey(a)){res.expenses.push(r);return;}   /* ✅ ديون معدومة تدخل هنا كمصاريف */
+    if(catKey(a)){res.expenses.push(r);return;}
   });
   return res;
 }
@@ -305,6 +311,18 @@ function computeDaily(from,to){
 function fullRange(){let min=null,max=null;for(const k in RAW)(RAW[k]||[]).forEach(r=>{if(!min||r.date<min)min=r.date;if(!max||r.date>max)max=r.date;});return[min,max];}
 function anim(el,val){const t0=performance.now();(function st(t){const p=Math.min(1,(t-t0)/800),e=1-Math.pow(1-p,3);el.textContent=fmt(val*e);if(p<1)requestAnimationFrame(st);})(t0);}
 
+/* ✅ الأشهر داخل الفترة الحالية */
+function monthsInRange(){
+  const out=[];if(!chartFrom||!chartTo)return out;
+  const d=new Date(chartFrom.getFullYear(),chartFrom.getMonth(),1);
+  while(d<=chartTo&&out.length<60){
+    out.push({key:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'),from:new Date(d),to:new Date(d.getFullYear(),d.getMonth()+1,0,23,59,59)});
+    d.setMonth(d.getMonth()+1);
+  }
+  return out;
+}
+function isMonthMode(){return monthsInRange().length>1;}
+
 function detailItem(name,icon,rows,net,income){
   const sumD=rows.reduce((s,r)=>s+r.debit,0),sumC=rows.reduce((s,r)=>s+r.credit,0);
   const el=document.createElement('div');el.className='acc-item';
@@ -320,7 +338,10 @@ function renderAll(){
   if(!RAW||!chartFrom)return;
   ['filterCard','kpis','stmtCard','chartCard','expCard'].forEach(id=>$('#'+id).classList.remove('hidden'));
   const selKey=selectedDay?iso(selectedDay):null;
-  const st=computeStats(selectedDay||chartFrom,selectedDay||chartTo);
+  const selMKey=selectedMonth?selectedMonth.key:null;
+  const f=selectedDay?selectedDay:(selectedMonth?selectedMonth.from:chartFrom);
+  const t=selectedDay?selectedDay:(selectedMonth?selectedMonth.to:chartTo);
+  const st=computeStats(f,t);
   anim($('#kSales'),st.sales);$('#kSalesS').textContent=st.counts.s+' فاتورة';
   anim($('#kRet'),st.ret);$('#kRetS').textContent=st.counts.r+' سند';
   anim($('#kDisc'),st.disc);$('#kDiscS').textContent=st.counts.d+' سند';
@@ -339,9 +360,10 @@ function renderAll(){
   $('#s7').textContent=fmt(st.otherIncome);$('#s8').textContent=fmt(st.gross+st.otherIncome);$('#s9').textContent=fmt(st.expenses);$('#s10').textContent=fmt(st.net);
   const rc=$('#rangeChip');
   if(selKey){rc.textContent='📅 يوم محدد: '+selKey;rc.classList.add('day');}
+  else if(selMKey){rc.textContent='📅 شهر محدد: '+selMKey;rc.classList.add('day');}
   else{rc.textContent='الفترة: '+iso(chartFrom)+' ← '+iso(chartTo);rc.classList.remove('day');}
   $('#fileChip').textContent='الملف: '+CURRENT.name;
-  renderChart(selKey);renderDayButtonState(selKey);
+  renderChart(selKey,selMKey);renderDayButtonState(selKey,selMKey);
   const box=$('#expList');box.innerHTML='';
   CATS.map(c=>st.catMap[c[0]]).sort((a,b)=>b.amt-a.amt).forEach(c=>{
     box.appendChild(detailItem(c.name,c.icon,c.rows,c.amt,false));
@@ -350,18 +372,18 @@ function renderAll(){
   box.appendChild(detailItem('الحسم المكتسب','fa-percent',st.enRows,st.earned,true));
 }
 
-function renderChart(selKey){
+function renderChart(selKey,selMKey){
   const daily=computeDaily(chartFrom,chartTo);
   const days=Object.keys(daily).sort();
   const labels=days.map(d=>{const p=d.split('-');return p[2]+'/'+p[1];});
-  const barColors=days.map(d=>d===selKey?'#f59e0b':'#4f46e5');
+  const barColors=days.map(d=>(d===selKey||(selMKey&&d.startsWith(selMKey)))?'#f59e0b':'#4f46e5');
   if(CHART)CHART.destroy();
   if(typeof Chart==='undefined')return;
   CHART=new Chart($('#chart'),{data:{labels:labels,datasets:[
     {type:'bar',label:'المبيعات',data:days.map(d=>daily[d].s),backgroundColor:barColors,borderRadius:3,barPercentage:.95,categoryPercentage:.85},
     {type:'line',label:'المصاريف',data:days.map(d=>daily[d].e),borderColor:'#e11d48',backgroundColor:'#e11d48',borderWidth:1.5,pointRadius:2,tension:.3}]},
     options:{responsive:true,maintainAspectRatio:false,animation:false,
-      onClick:(evt,els)=>{if(els.length&&els[0].datasetIndex===0){toggleDay(days[els[0].index]);}},
+      onClick:(evt,els)=>{if(els.length&&els[0].datasetIndex===0){const d=days[els[0].index];if(isMonthMode())toggleMonth(d.slice(0,7));else toggleDay(d);}},
       onHover:(evt,els)=>{if(evt.native&&evt.native.target)evt.native.target.style.cursor=(els.length&&els[0].datasetIndex===0)?'pointer':'default';},
       plugins:{legend:{labels:{font:{family:'Cairo',weight:700,size:10},boxWidth:12,boxHeight:12}},
         tooltip:{titleFont:{family:'Cairo'},bodyFont:{family:'Cairo'},callbacks:{title:items=>'اليوم: '+days[items[0].dataIndex],label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},
@@ -369,8 +391,15 @@ function renderChart(selKey){
         y:{grid:{color:'#eef1f8'},ticks:{font:{family:'Cairo',size:9},callback:v=>fmtShort(v)}}}}});
 }
 function toggleDay(key){
+  selectedMonth=null;
   if(selectedDay&&iso(selectedDay)===key){selectedDay=null;$('#dFrom').value=iso(chartFrom);$('#dTo').value=iso(chartTo);toast('تم إلغاء تحديد اليوم');}
   else{selectedDay=new Date(key+'T00:00:00');$('#dFrom').value=key;$('#dTo').value=key;toast('تم تحديد يوم: '+key);}
+  renderAll();
+}
+function toggleMonth(key){
+  selectedDay=null;
+  if(selectedMonth&&selectedMonth.key===key){selectedMonth=null;$('#dFrom').value=iso(chartFrom);$('#dTo').value=iso(chartTo);toast('تم إلغاء تحديد الشهر');}
+  else{const m=monthsInRange().find(x=>x.key===key);if(!m)return;selectedMonth=m;$('#dFrom').value=iso(m.from);$('#dTo').value=iso(m.to);toast('تم تحديد شهر: '+key);}
   renderAll();
 }
 function apply(){
@@ -378,39 +407,50 @@ function apply(){
   let f=new Date($('#dFrom').value+'T00:00:00'),t=new Date($('#dTo').value+'T23:59:59');
   if(isNaN(f)||isNaN(t))return;
   if(f>t)[f,t]=[t,f];
-  chartFrom=f;chartTo=t;selectedDay=null;renderAll();
+  chartFrom=f;chartTo=t;selectedDay=null;selectedMonth=null;renderAll();
 }
 function resetRange(){
   const[mn,mx]=fullRange();if(!mn)return;
-  chartFrom=mn;chartTo=mx;selectedDay=null;
+  chartFrom=mn;chartTo=mx;selectedDay=null;selectedMonth=null;
   $('#dFrom').value=iso(mn);$('#dTo').value=iso(mx);renderAll();
 }
-function renderDayButtonState(selKey){
+function renderDayButtonState(selKey,selMKey){
   const btn=$('#dayBtn');
-  if(selKey){btn.classList.add('on');btn.title='اليوم المحدد: '+selKey;}
-  else{btn.classList.remove('on');btn.title='اختر يوم';}
+  if(selKey||selMKey){btn.classList.add('on');btn.title=selKey?('اليوم: '+selKey):('الشهر: '+selMKey);}
+  else{btn.classList.remove('on');btn.title='اختر فترة';}
 }
-function openDayPop(){
+/* ✅ القائمة لا تختفي تلقائياً — وتعرض أشهراً مرتبة عند الفترات الكبيرة */
+function openPop(){
   if(!chartFrom||!chartTo)return;
-  const days=Object.keys(computeDaily(chartFrom,chartTo)).sort();
-  const selKey=selectedDay?iso(selectedDay):null;
   const grid=$('#dayGrid');grid.innerHTML='';
-  if(!days.length){grid.innerHTML='<div class="day-pop-empty">لا توجد أيام في الفترة الحالية</div>';}
-  else days.forEach(d=>{
-    const b=document.createElement('button');
-    b.className='day-cell'+(d===selKey?' on':'');
-    b.textContent=+d.split('-')[2];
-    b.onclick=e=>{e.stopPropagation();toggleDay(d);closeDayPop();};
-    grid.appendChild(b);
-  });
+  const mm=isMonthMode();
+  $('#popTitle').textContent=mm?'اختر شهراً محدداً':'اختر يوماً محدداً';
+  grid.classList.toggle('months',mm);
+  if(mm){
+    monthsInRange().forEach(m=>{
+      const b=document.createElement('button');
+      b.className='day-cell'+(selectedMonth&&selectedMonth.key===m.key?' on':'');
+      b.textContent=m.key;
+      b.onclick=e=>{e.stopPropagation();toggleMonth(m.key);closePop();};
+      grid.appendChild(b);
+    });
+  }else{
+    const days=Object.keys(computeDaily(chartFrom,chartTo)).sort();
+    if(!days.length){grid.innerHTML='<div class="day-pop-empty">لا توجد أيام في الفترة الحالية</div>';}
+    else days.forEach(d=>{
+      const b=document.createElement('button');
+      b.className='day-cell'+(d===(selectedDay?iso(selectedDay):null)?' on':'');
+      b.textContent=+d.split('-')[2];
+      b.onclick=e=>{e.stopPropagation();toggleDay(d);closePop();};
+      grid.appendChild(b);
+    });
+  }
   $('#dayPop').classList.add('open');
-  clearTimeout(popCloseTimer);popCloseTimer=setTimeout(closeDayPop,3000);
 }
-function closeDayPop(){$('#dayPop').classList.remove('open');clearTimeout(popCloseTimer);}
-$('#dayBtn').onclick=e=>{e.stopPropagation();const p=$('#dayPop');if(p.classList.contains('open'))closeDayPop();else openDayPop();};
-$('#dayClear').onclick=e=>{e.stopPropagation();if(selectedDay){selectedDay=null;$('#dFrom').value=iso(chartFrom);$('#dTo').value=iso(chartTo);toast('تم إلغاء تحديد اليوم');renderAll();}closeDayPop();};
-document.addEventListener('click',e=>{const p=$('#dayPop'),b=$('#dayBtn');if(p&&p.classList.contains('open')&&!p.contains(e.target)&&!b.contains(e.target))closeDayPop();});
-document.addEventListener('mouseover',e=>{const p=$('#dayPop');if(p&&p.classList.contains('open')&&p.contains(e.target)){clearTimeout(popCloseTimer);popCloseTimer=setTimeout(closeDayPop,3000);}});
+function closePop(){$('#dayPop').classList.remove('open');}
+$('#dayBtn').onclick=e=>{e.stopPropagation();const p=$('#dayPop');if(p.classList.contains('open'))closePop();else openPop();};
+$('#dayClear').onclick=e=>{e.stopPropagation();if(selectedDay||selectedMonth){selectedDay=null;selectedMonth=null;$('#dFrom').value=iso(chartFrom);$('#dTo').value=iso(chartTo);toast('تم إلغاء التحديد');renderAll();}closePop();};
+document.addEventListener('click',e=>{const p=$('#dayPop'),b=$('#dayBtn');if(p&&p.classList.contains('open')&&!p.contains(e.target)&&!b.contains(e.target))closePop();});
 
 async function renderLocal(){
   const items=(await idbAll()).sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||''));
