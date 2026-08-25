@@ -144,10 +144,11 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
     <div class="kpi" style="--c:#4f46e5"><div class="t"><span class="ic"><i class="fa-solid fa-bag-shopping"></i></span>إجمالي المبيعات</div><div class="v" id="kSales">0</div><div class="s" id="kSalesS"></div></div>
     <div class="kpi" style="--c:#e11d48"><div class="t"><span class="ic"><i class="fa-solid fa-rotate-left"></i></span>مردودات المبيعات</div><div class="v neg" id="kRet">0</div><div class="s" id="kRetS"></div></div>
     <div class="kpi" style="--c:#d97706"><div class="t"><span class="ic"><i class="fa-solid fa-tags"></i></span>الحسم الممنوح</div><div class="v neg" id="kDisc">0</div><div class="s" id="kDiscS"></div></div>
-    <div class="kpi" style="--c:#0d9488"><div class="t"><span class="ic"><i class="fa-solid fa-wallet"></i></span>صافي المبيعات</div><div class="v" id="kNet">0</div><div class="s">الإجمالي − المردودات − الحسم</div></div>
+    <div class="kpi" style="--c:#0d9488"><div class="t"><span class="ic"><i class="fa-solid fa-wallet"></i></span>صافي المبيعات</div><div class="v" id="kNet">0</div><div class="s">بعد طرح الحسم المكتسب</div></div>
+    <div class="kpi" style="--c:#be185d"><div class="t"><span class="ic"><i class="fa-solid fa-percent"></i></span>الحسم المكتسب</div><div class="v neg" id="kEarn">0</div><div class="s">يُطرح من صافي المبيعات</div></div>
     <div class="kpi" style="--c:#ea580c"><div class="t"><span class="ic"><i class="fa-solid fa-boxes-stacked"></i></span>تكلفة البضاعة المباعة</div><div class="v" id="kCogs">0</div><div class="s">مدين − دائن</div></div>
-    <div class="kpi" style="--c:#7c3aed"><div class="t"><span class="ic"><i class="fa-solid fa-chart-simple"></i></span>مجمل الدخل</div><div class="v" id="kGross">0</div><div class="s">صافي المبيعات − التكلفة</div></div>
-    <div class="kpi" style="--c:#059669"><div class="t"><span class="ic"><i class="fa-solid fa-coins"></i></span>إيرادات مختلفة</div><div class="v pos" id="kOther">0</div><div class="s" id="kOtherS">من ورقة التكلفة</div></div>
+    <div class="kpi" style="--c:#7c3aed"><div class="t"><span class="ic"><i class="fa-solid fa-chart-simple"></i></span>مجمل الدخل</div><div class="v" id="kGross">0</div><div class="s">الصافي بعد الحسم − التكلفة</div></div>
+    <div class="kpi" style="--c:#059669"><div class="t"><span class="ic"><i class="fa-solid fa-coins"></i></span>إيرادات مختلفة</div><div class="v pos" id="kOther">0</div><div class="s" id="kOtherS"></div></div>
     <div class="kpi" style="--c:#e11d48"><div class="t"><span class="ic"><i class="fa-solid fa-receipt"></i></span>إجمالي المصاريف</div><div class="v neg" id="kExp">0</div><div class="s" id="kExpS"></div></div>
     <div class="kpi" style="--c:#059669"><div class="t"><span class="ic"><i class="fa-solid fa-sack-dollar"></i></span>صافي الدخل</div><div class="v pos" id="kNetInc">0</div><div class="s">مجمل + إيرادات − مصاريف</div></div>
   </section>
@@ -160,6 +161,8 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
         <div class="row"><span>(−) مردودات المبيعات</span><b class="neg" id="s2">0</b></div>
         <div class="row"><span>(−) الحسم الممنوح</span><b class="neg" id="s3">0</b></div>
         <div class="row"><span>(=) صافي المبيعات</span><b id="s4">0</b></div>
+        <div class="row"><span>(−) الحسم المكتسب</span><b class="neg" id="s4b">0</b></div>
+        <div class="row"><span>(=) صافي المبيعات بعد الحسم المكتسب</span><b id="s4c">0</b></div>
         <div class="row"><span>(−) تكلفة البضاعة المباعة (مدين − دائن)</span><b class="neg" id="s5">0</b></div>
         <div class="row"><span>(=) مجمل الدخل</span><b id="s6">0</b></div>
         <div class="row"><span>(+) إيرادات مختلفة</span><b class="pos" id="s7">0</b></div>
@@ -232,53 +235,27 @@ function toNum(v){if(typeof v==='number')return v;if(v==null)return 0;const n=pa
 function toDate(v){if(v instanceof Date)return v;if(typeof v==='number')return new Date(Math.round((v-25569)*864e5));const m=String(v).match(/(\d{4})-(\d{2})-(\d{2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);const d=new Date(v);return isNaN(d)?null:d;}
 function rowsFrom(ws){if(!ws)return[];return XLSX.utils.sheet_to_json(ws,{defval:null}).map(r=>({date:toDate(r['التاريخ']),voucher:r['رقم السند'],type:r['النوع'],debit:toNum(r['مدين']),credit:toNum(r['دائن']),stmt:r['البيان']||'',acc:(r['اسم الحساب']||'').trim()})).filter(r=>r.date);}
 
+/* ✅ التصنيف المصحح: الاتجاهان (مدين/دائن) يدخلان الفئة نفسها وتُصافى لاحقاً */
 function wbToRAW(wb){
   let allRows=[];
-  wb.SheetNames.forEach(name=>{
-    const ws=wb.Sheets[name];
-    if(ws){
-      allRows=allRows.concat(rowsFrom(ws));
-    }
-  });
-  
-  const classify=(r)=>{
-    const acc=norm(r.acc);
-    const type=norm(r.type);
-    const stmt=norm(r.stmt);
-    
-    if(acc.includes('مسحوبات')||acc.includes('السيدعباس'))return null;
-    
-    if(r.credit>0&&acc.includes('المبيعات')&&!type.includes('مرتجع')){
-      return'sales';
-    }
-    if(acc.includes('مردودات')||type.includes('مرتجع مبيع')){
-      return'returns';
-    }
-    if(acc.includes('الحسم')){
-      return'discounts';
-    }
-    if(acc.includes('تكلفةالبضاعة')||acc.includes('تكلفةالبضاعةالمباعة')){
-      return'cogs';
-    }
-    if(acc.includes('ايرادات')||acc.includes('إيرادات')){
-      return'otherIncome';
-    }
-    if(acc.includes('زيادة')||acc.includes('نقص')||acc.includes('صندوق')){
-      if(r.debit>0)return'expenses';
-      if(r.credit>0)return'otherIncome';
-    }
-    if(r.debit>0&&!acc.includes('المبيعات')&&!acc.includes('مردودات')&&!acc.includes('الحسم')&&!acc.includes('تكلفة')){
-      return'expenses';
-    }
-    return null;
-  };
-  
-  const result={sales:[],returns:[],discounts:[],cogs:[],otherIncome:[],expenses:[]};
+  wb.SheetNames.forEach(n=>{const ws=wb.Sheets[n];if(ws)allRows=allRows.concat(rowsFrom(ws));});
+  const lookup={};CATS.forEach(c=>lookup[norm(c[0])]=c[0]);
+  const res={sales:[],returns:[],discounts:[],cogs:[],otherIncome:[],expenses:[],earned:[]};
   allRows.forEach(r=>{
-    const cat=classify(r);
-    if(cat&&result[cat])result[cat].push(r);
+    const a=norm(r.acc);
+    /* المسحوبات الشخصية خارج قائمة الدخل بالكامل (مدين ودائن) */
+    if(a.includes('مسحوبات')||a.includes('السيدعباس'))return;
+    /* الحسم المكتسب قبل الحسم الممنوح لأن الاسم يحتوي على كلمة حسم */
+    if(a.includes('مكتسب')){res.earned.push(r);return;}
+    if(a.includes('مردودات')){res.returns.push(r);return;}
+    if(a.includes('المبيعات')){res.sales.push(r);return;}
+    if(a.includes('الحسم')){res.discounts.push(r);return;}
+    if(a.includes('تكلفةالبضاعة')){res.cogs.push(r);return;}
+    if(a.includes('ايرادات')||a.includes('إيرادات')){res.otherIncome.push(r);return;}
+    /* فئة مصاريف معروفة: يدخل القيد سواء مدين أو دائن ويُصافى (مدين − دائن) */
+    if(ALIAS[a]||lookup[a]){res.expenses.push(r);return;}
   });
-  return result;
+  return res;
 }
 
 function serializeRAW(){const o={};for(const k in RAW)o[k]=RAW[k].map(r=>[iso(r.date),r.voucher,r.type,r.debit,r.credit,r.stmt,r.acc]);return o;}
@@ -286,23 +263,28 @@ function deserializeRAW(o){const m=r=>({date:toDate(r[0]),voucher:r[1],type:r[2]
 
 function computeStats(from,to){
   const inR=r=>r.date>=from&&r.date<=to;
-  const S=RAW.sales.filter(inR),R=RAW.returns.filter(inR),D=RAW.discounts.filter(inR),C=RAW.cogs.filter(inR),E=RAW.expenses.filter(inR),OI=(RAW.otherIncome||[]).filter(inR);
+  const S=RAW.sales.filter(inR),R=RAW.returns.filter(inR),D=RAW.discounts.filter(inR),C=RAW.cogs.filter(inR),E=RAW.expenses.filter(inR),OI=(RAW.otherIncome||[]).filter(inR),EN=(RAW.earned||[]).filter(inR);
   const sum=(a,k)=>a.reduce((s,r)=>s+r[k],0);
-  const sales=sum(S,'credit'),ret=sum(R,'debit'),disc=sum(D,'debit')-sum(D,'credit');
+  /* ✅ كل بند يُحسب صافياً باتجاهه الصحيح */
+  const sales=sum(S,'credit')-sum(S,'debit');
+  const ret=sum(R,'debit')-sum(R,'credit');
+  const disc=sum(D,'debit')-sum(D,'credit');
+  const earned=sum(EN,'credit')-sum(EN,'debit');
   const netSales=sales-ret-disc;
+  const netAfter=netSales-earned;              /* صافي المبيعات بعد الحسم المكتسب */
   const cogs=sum(C,'debit')-sum(C,'credit');
-  const gross=netSales-cogs;
-  const otherIncome=sum(OI,'credit');
+  const gross=netAfter-cogs;
+  const otherIncome=sum(OI,'credit')-sum(OI,'debit');
   const lookup={};CATS.forEach(c=>lookup[norm(c[0])]=c[0]);
   const catMap={};CATS.forEach(c=>catMap[c[0]]={name:c[0],icon:c[1],amt:0,rows:[]});
   E.forEach(r=>{let key=ALIAS[norm(r.acc)]||lookup[norm(r.acc)];if(key&&catMap[key]){catMap[key].amt+=r.debit-r.credit;catMap[key].rows.push(r);}});
   const expenses=CATS.reduce((s,c)=>s+catMap[c[0]].amt,0);
-  return{sales,ret,disc,netSales,cogs,gross,otherIncome,expenses,net:gross+otherIncome-expenses,catMap,counts:{s:S.length,r:R.length,d:D.length,c:C.length,e:E.length,oi:OI.length}};
+  return{sales,ret,disc,earned,netSales,netAfter,cogs,gross,otherIncome,expenses,net:gross+otherIncome-expenses,catMap,counts:{s:S.length,r:R.length,d:D.length,c:C.length,e:E.length,oi:OI.length,en:EN.length}};
 }
 function computeDaily(from,to){
   const daily={};
-  RAW.sales.forEach(r=>{if(r.date>=from&&r.date<=to){const k=iso(r.date);(daily[k]=daily[k]||{s:0,e:0}).s+=r.credit;}});
-  RAW.expenses.forEach(r=>{if(r.date>=from&&r.date<=to){const k=iso(r.date);(daily[k]=daily[k]||{s:0,e:0}).e+=r.debit;}});
+  RAW.sales.forEach(r=>{if(r.date>=from&&r.date<=to){const k=iso(r.date);(daily[k]=daily[k]||{s:0,e:0}).s+=r.credit-r.debit;}});
+  RAW.expenses.forEach(r=>{if(r.date>=from&&r.date<=to){const k=iso(r.date);(daily[k]=daily[k]||{s:0,e:0}).e+=r.debit-r.credit;}});
   return daily;
 }
 function fullRange(){let min=null,max=null;for(const k in RAW)(RAW[k]||[]).forEach(r=>{if(!min||r.date<min)min=r.date;if(!max||r.date>max)max=r.date;});return[min,max];}
@@ -316,12 +298,15 @@ function renderAll(){
   anim($('#kSales'),st.sales);$('#kSalesS').textContent=st.counts.s+' فاتورة';
   anim($('#kRet'),st.ret);$('#kRetS').textContent=st.counts.r+' سند';
   anim($('#kDisc'),st.disc);$('#kDiscS').textContent=st.counts.d+' سند';
-  anim($('#kNet'),st.netSales);anim($('#kCogs'),st.cogs);anim($('#kGross'),st.gross);
+  anim($('#kEarn'),st.earned);
+  anim($('#kNet'),st.netAfter);
+  anim($('#kCogs'),st.cogs);anim($('#kGross'),st.gross);
   anim($('#kOther'),st.otherIncome);$('#kOtherS').textContent=st.counts.oi+' قيد إيرادات';
   anim($('#kExp'),st.expenses);$('#kExpS').textContent=st.counts.e+' سند';
   anim($('#kNetInc'),st.net);
   $('#s1').textContent=fmt(st.sales);$('#s2').textContent=fmt(st.ret);$('#s3').textContent=fmt(st.disc);
-  $('#s4').textContent=fmt(st.netSales);$('#s5').textContent=fmt(st.cogs);$('#s6').textContent=fmt(st.gross);
+  $('#s4').textContent=fmt(st.netSales);$('#s4b').textContent=fmt(st.earned);$('#s4c').textContent=fmt(st.netAfter);
+  $('#s5').textContent=fmt(st.cogs);$('#s6').textContent=fmt(st.gross);
   $('#s7').textContent=fmt(st.otherIncome);$('#s8').textContent=fmt(st.gross+st.otherIncome);$('#s9').textContent=fmt(st.expenses);$('#s10').textContent=fmt(st.net);
   const rc=$('#rangeChip');
   if(selKey){rc.textContent='📅 يوم محدد: '+selKey;rc.classList.add('day');}
@@ -413,7 +398,7 @@ async function renderLocal(){
     const el=document.createElement('div');el.className='file-item';
     el.innerHTML='<div class="fi-icon"><i class="fa-solid fa-file-excel"></i></div>'+
     '<div class="fi-info"><b>'+it.name+'</b><span>حُفظ: '+new Date(it.savedAt).toLocaleString('ar-IQ')+'</span>'+
-    '<div class="fi-mini"><em>سجلات: <b>'+((m.counts&&(m.counts.s+m.counts.r+m.counts.d+m.counts.c+m.counts.e+m.counts.oi))||0)+'</b></em><em>مبيعات: <b>'+fmt(m.sales)+'</b></em><em>تكلفة: <b>'+fmt(m.cogs)+'</b></em><em>إيرادات: <b>'+fmt(m.otherIncome)+'</b></em><em>صافي: <b>'+fmt(m.net)+'</b></em></div></div>'+
+    '<div class="fi-mini"><em>سجلات: <b>'+((m.counts&&(m.counts.s+m.counts.r+m.counts.d+m.counts.c+m.counts.e+m.counts.oi+m.counts.en))||0)+'</b></em><em>مبيعات: <b>'+fmt(m.sales)+'</b></em><em>تكلفة: <b>'+fmt(m.cogs)+'</b></em><em>إيرادات: <b>'+fmt(m.otherIncome)+'</b></em><em>صافي: <b>'+fmt(m.net)+'</b></em></div></div>'+
     '<div class="fi-actions"><button class="btn btn-sm btn-ghost" data-open="'+it.id+'"><i class="fa-solid fa-folder-open"></i> فتح</button><button class="btn btn-sm btn-danger" data-del="'+it.id+'"><i class="fa-solid fa-trash"></i></button></div>';
     box.appendChild(el);
   });
@@ -483,7 +468,7 @@ $('#btnSave').onclick=async()=>{
   if(!RAW||!CURRENT){toast('لا يوجد ملف مفتوح للحفظ');return;}
   const[mn,mx]=fullRange();const st=computeStats(mn,mx);
   const item={id:CURRENT.name,name:CURRENT.name,savedAt:new Date().toISOString(),data:serializeRAW(),
-    meta:{sales:st.sales,ret:st.ret,disc:st.disc,cogs:st.cogs,otherIncome:st.otherIncome,expenses:st.expenses,net:st.net,counts:st.counts}};
+    meta:{sales:st.sales,ret:st.ret,disc:st.disc,earned:st.earned,cogs:st.cogs,otherIncome:st.otherIncome,expenses:st.expenses,net:st.net,counts:st.counts}};
   try{await idbPut(item);await renderLocal();toast('✔ تم حفظ "'+CURRENT.name+'" في قائمة الملفات');}
   catch(e){toast('تعذّر الحفظ');}
 };
