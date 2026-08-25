@@ -66,9 +66,11 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .acc-head{width:100%;border:none;background:#fff;display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;font-family:'Cairo'}
 .acc-head:hover{background:#f8fafc}
 .acc-ic{width:34px;height:34px;border-radius:10px;background:#fef2f2;color:#e11d48;display:grid;place-items:center;font-size:13px;flex-shrink:0}
+.acc-ic.pos{background:#ecfdf5;color:#059669}
 .acc-name{flex:1;text-align:right;font-size:12.5px;font-weight:800}
 .acc-count{font-size:10px;font-weight:800;color:#64748b;background:#f1f5f9;border-radius:999px;padding:3px 9px}
 .acc-total{font-size:12.5px;font-weight:900;color:#e11d48}
+.acc-total.pos{color:#059669}
 .acc-chev{color:#94a3b8;font-size:11px;transition:.3s}
 .acc-item.open .acc-chev{transform:rotate(180deg)}
 .acc-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
@@ -79,6 +81,7 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .acc-inner th{background:#efedfb;color:#5a5878;font-weight:800;padding:7px 10px;text-align:right;position:sticky;top:0}
 .acc-inner td{padding:7px 10px;border-top:1px solid #eceafb;font-weight:700;color:#555a75}
 .acc-inner td.amt{color:#e11d48;font-weight:900;text-align:left}
+.acc-inner td.amt.pos{color:#059669}
 .acc-inner tfoot td{background:#efedfb;color:#3f3d56;font-weight:900;border-top:2px solid #e2e0f5;font-size:10.5px}
 #overlay{position:fixed;inset:0;background:rgba(233,237,248,.95);backdrop-filter:blur(6px);z-index:100;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center}
 .spin{width:52px;height:52px;border-radius:50%;border:5px solid #e2e8f0;border-top-color:#4f46e5;animation:sp 1s linear infinite}
@@ -147,8 +150,8 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
     <div class="kpi" style="--c:#0d9488"><div class="t"><span class="ic"><i class="fa-solid fa-wallet"></i></span>صافي المبيعات</div><div class="v" id="kNet">0</div><div class="s">بعد طرح الحسم المكتسب</div></div>
     <div class="kpi" style="--c:#be185d"><div class="t"><span class="ic"><i class="fa-solid fa-percent"></i></span>الحسم المكتسب</div><div class="v neg" id="kEarn">0</div><div class="s">يُطرح من صافي المبيعات</div></div>
     <div class="kpi" style="--c:#ea580c"><div class="t"><span class="ic"><i class="fa-solid fa-boxes-stacked"></i></span>تكلفة البضاعة المباعة</div><div class="v" id="kCogs">0</div><div class="s">مدين − دائن</div></div>
-    <div class="kpi" style="--c:#7c3aed"><div class="t"><span class="ic"><i class="fa-solid fa-chart-simple"></i></span>مجمل الدخل</div><div class="v" id="kGross">0</div><div class="s">الصافي بعد الحسم − التكلفة</div></div>
-    <div class="kpi" style="--c:#059669"><div class="t"><span class="ic"><i class="fa-solid fa-coins"></i></span>إيرادات مختلفة</div><div class="v pos" id="kOther">0</div><div class="s" id="kOtherS"></div></div>
+    <div class="kpi" style="--c:#7c3aed"><div class="t"><span class="ic"><i class="fa-solid fa-chart-simple"></i></span>صافي المشتريات (مجمل الدخل)</div><div class="v" id="kGross">0</div><div class="s">الصافي بعد الحسم − التكلفة</div></div>
+    <div class="kpi" style="--c:#059669"><div class="t"><span class="ic"><i class="fa-solid fa-coins"></i></span>إيرادات مختلفة + تدوير قيم</div><div class="v pos" id="kOther">0</div><div class="s" id="kOtherS"></div></div>
     <div class="kpi" style="--c:#e11d48"><div class="t"><span class="ic"><i class="fa-solid fa-receipt"></i></span>إجمالي المصاريف</div><div class="v neg" id="kExp">0</div><div class="s" id="kExpS"></div></div>
     <div class="kpi" style="--c:#059669"><div class="t"><span class="ic"><i class="fa-solid fa-sack-dollar"></i></span>صافي الدخل</div><div class="v pos" id="kNetInc">0</div><div class="s">مجمل + إيرادات − مصاريف</div></div>
   </section>
@@ -164,8 +167,8 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
         <div class="row"><span>(−) الحسم المكتسب</span><b class="neg" id="s4b">0</b></div>
         <div class="row"><span>(=) صافي المبيعات بعد الحسم المكتسب</span><b id="s4c">0</b></div>
         <div class="row"><span>(−) تكلفة البضاعة المباعة (مدين − دائن)</span><b class="neg" id="s5">0</b></div>
-        <div class="row"><span>(=) مجمل الدخل</span><b id="s6">0</b></div>
-        <div class="row"><span>(+) إيرادات مختلفة</span><b class="pos" id="s7">0</b></div>
+        <div class="row"><span>(=) صافي المشتريات (مجمل الدخل)</span><b id="s6">0</b></div>
+        <div class="row"><span>(+) إيرادات مختلفة + تدوير قيم</span><b class="pos" id="s7">0</b></div>
         <div class="row"><span>(=) إجمالي صافي الدخل بعد الإيرادات</span><b id="s8">0</b></div>
         <div class="row"><span>(−) إجمالي المصاريف</span><b class="neg" id="s9">0</b></div>
         <div class="total-btn"><span>صافي الدخل النهائي</span><b id="s10">0</b></div>
@@ -191,7 +194,7 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
   </div>
 
   <section class="card hidden" id="expCard">
-    <div class="card-head"><h2><i class="fa-solid fa-layer-group"></i> تفاصيل المصاريف حسب الفئة (انقر للفتح)</h2></div>
+    <div class="card-head"><h2><i class="fa-solid fa-layer-group"></i> تفاصيل المصاريف والإيرادات حسب الفئة (انقر للفتح)</h2></div>
     <div id="expList"></div>
   </section>
 </main>
@@ -235,7 +238,7 @@ function toNum(v){if(typeof v==='number')return v;if(v==null)return 0;const n=pa
 function toDate(v){if(v instanceof Date)return v;if(typeof v==='number')return new Date(Math.round((v-25569)*864e5));const m=String(v).match(/(\d{4})-(\d{2})-(\d{2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);const d=new Date(v);return isNaN(d)?null:d;}
 function rowsFrom(ws){if(!ws)return[];return XLSX.utils.sheet_to_json(ws,{defval:null}).map(r=>({date:toDate(r['التاريخ']),voucher:r['رقم السند'],type:r['النوع'],debit:toNum(r['مدين']),credit:toNum(r['دائن']),stmt:r['البيان']||'',acc:(r['اسم الحساب']||'').trim()})).filter(r=>r.date);}
 
-/* ✅ التصنيف المصحح: الاتجاهان (مدين/دائن) يدخلان الفئة نفسها وتُصافى لاحقاً */
+/* ✅ التصنيف: الاتجاهان (مدين/دائن) يدخلان الفئة نفسها وتُصافى لاحقاً */
 function wbToRAW(wb){
   let allRows=[];
   wb.SheetNames.forEach(n=>{const ws=wb.Sheets[n];if(ws)allRows=allRows.concat(rowsFrom(ws));});
@@ -243,16 +246,14 @@ function wbToRAW(wb){
   const res={sales:[],returns:[],discounts:[],cogs:[],otherIncome:[],expenses:[],earned:[]};
   allRows.forEach(r=>{
     const a=norm(r.acc);
-    /* المسحوبات الشخصية خارج قائمة الدخل بالكامل (مدين ودائن) */
     if(a.includes('مسحوبات')||a.includes('السيدعباس'))return;
-    /* الحسم المكتسب قبل الحسم الممنوح لأن الاسم يحتوي على كلمة حسم */
     if(a.includes('مكتسب')){res.earned.push(r);return;}
+    if(a.includes('تدوير')){res.otherIncome.push(r);return;}   /* ✅ تدوير قيم مع الإيرادات */
     if(a.includes('مردودات')){res.returns.push(r);return;}
     if(a.includes('المبيعات')){res.sales.push(r);return;}
     if(a.includes('الحسم')){res.discounts.push(r);return;}
     if(a.includes('تكلفةالبضاعة')){res.cogs.push(r);return;}
     if(a.includes('ايرادات')||a.includes('إيرادات')){res.otherIncome.push(r);return;}
-    /* فئة مصاريف معروفة: يدخل القيد سواء مدين أو دائن ويُصافى (مدين − دائن) */
     if(ALIAS[a]||lookup[a]){res.expenses.push(r);return;}
   });
   return res;
@@ -265,21 +266,20 @@ function computeStats(from,to){
   const inR=r=>r.date>=from&&r.date<=to;
   const S=RAW.sales.filter(inR),R=RAW.returns.filter(inR),D=RAW.discounts.filter(inR),C=RAW.cogs.filter(inR),E=RAW.expenses.filter(inR),OI=(RAW.otherIncome||[]).filter(inR),EN=(RAW.earned||[]).filter(inR);
   const sum=(a,k)=>a.reduce((s,r)=>s+r[k],0);
-  /* ✅ كل بند يُحسب صافياً باتجاهه الصحيح */
   const sales=sum(S,'credit')-sum(S,'debit');
   const ret=sum(R,'debit')-sum(R,'credit');
   const disc=sum(D,'debit')-sum(D,'credit');
   const earned=sum(EN,'credit')-sum(EN,'debit');
   const netSales=sales-ret-disc;
-  const netAfter=netSales-earned;              /* صافي المبيعات بعد الحسم المكتسب */
+  const netAfter=netSales-earned;
   const cogs=sum(C,'debit')-sum(C,'credit');
-  const gross=netAfter-cogs;
-  const otherIncome=sum(OI,'credit')-sum(OI,'debit');
+  const gross=netAfter-cogs;   /* = صافي المشتريات (مجمل الدخل) */
+  const otherIncome=sum(OI,'credit')-sum(OI,'debit');  /* إيرادات + تدوير قيم */
   const lookup={};CATS.forEach(c=>lookup[norm(c[0])]=c[0]);
   const catMap={};CATS.forEach(c=>catMap[c[0]]={name:c[0],icon:c[1],amt:0,rows:[]});
   E.forEach(r=>{let key=ALIAS[norm(r.acc)]||lookup[norm(r.acc)];if(key&&catMap[key]){catMap[key].amt+=r.debit-r.credit;catMap[key].rows.push(r);}});
   const expenses=CATS.reduce((s,c)=>s+catMap[c[0]].amt,0);
-  return{sales,ret,disc,earned,netSales,netAfter,cogs,gross,otherIncome,expenses,net:gross+otherIncome-expenses,catMap,counts:{s:S.length,r:R.length,d:D.length,c:C.length,e:E.length,oi:OI.length,en:EN.length}};
+  return{sales,ret,disc,earned,netSales,netAfter,cogs,gross,otherIncome,expenses,net:gross+otherIncome-expenses,catMap,oiRows:OI,enRows:EN,counts:{s:S.length,r:R.length,d:D.length,c:C.length,e:E.length,oi:OI.length,en:EN.length}};
 }
 function computeDaily(from,to){
   const daily={};
@@ -289,6 +289,18 @@ function computeDaily(from,to){
 }
 function fullRange(){let min=null,max=null;for(const k in RAW)(RAW[k]||[]).forEach(r=>{if(!min||r.date<min)min=r.date;if(!max||r.date>max)max=r.date;});return[min,max];}
 function anim(el,val){const t0=performance.now();(function st(t){const p=Math.min(1,(t-t0)/800),e=1-Math.pow(1-p,3);el.textContent=fmt(val*e);if(p<1)requestAnimationFrame(st);})(t0);}
+
+/* ✅ بطاقة تفاصيل عامة (مصاريف أو إيرادات) مع مدين − دائن */
+function detailItem(name,icon,rows,net,income){
+  const sumD=rows.reduce((s,r)=>s+r.debit,0),sumC=rows.reduce((s,r)=>s+r.credit,0);
+  const el=document.createElement('div');el.className='acc-item';
+  el.innerHTML='<button class="acc-head"><span class="acc-ic'+(income?' pos':'')+'"><i class="fa-solid '+icon+'"></i></span><span class="acc-name">'+name+'</span><span class="acc-count">'+rows.length+' قيد</span><b class="acc-total'+(income?' pos':'')+'">'+fmt(net)+'</b><i class="fa-solid fa-chevron-down acc-chev"></i></button>'+
+  '<div class="acc-body"><div class="acc-inner"><div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>السند</th><th>البيان</th><th>المبلغ</th></tr></thead><tbody>'+
+  rows.map(r=>'<tr><td>'+iso(r.date)+'</td><td>'+r.voucher+'</td><td>'+r.stmt+'</td><td class="amt'+(income?' pos':'')+'">'+fmt(income?(r.credit-r.debit):(r.debit-r.credit))+'</td></tr>').join('')+
+  '</tbody><tfoot><tr><td colspan="3">مجموع مدين: '+fmt(sumD)+' − مجموع دائن: '+fmt(sumC)+'</td><td class="amt'+(income?' pos':'')+'">'+fmt(net)+'</td></tr></tfoot></table></div></div></div>';
+  el.querySelector('.acc-head').onclick=()=>el.classList.toggle('open');
+  return el;
+}
 
 function renderAll(){
   if(!RAW||!chartFrom)return;
@@ -301,7 +313,7 @@ function renderAll(){
   anim($('#kEarn'),st.earned);
   anim($('#kNet'),st.netAfter);
   anim($('#kCogs'),st.cogs);anim($('#kGross'),st.gross);
-  anim($('#kOther'),st.otherIncome);$('#kOtherS').textContent=st.counts.oi+' قيد إيرادات';
+  anim($('#kOther'),st.otherIncome);$('#kOtherS').textContent=st.counts.oi+' قيد (إيرادات + تدوير)';
   anim($('#kExp'),st.expenses);$('#kExpS').textContent=st.counts.e+' سند';
   anim($('#kNetInc'),st.net);
   $('#s1').textContent=fmt(st.sales);$('#s2').textContent=fmt(st.ret);$('#s3').textContent=fmt(st.disc);
@@ -315,15 +327,12 @@ function renderAll(){
   renderChart(selKey);renderDayButtonState(selKey);
   const box=$('#expList');box.innerHTML='';
   CATS.map(c=>st.catMap[c[0]]).sort((a,b)=>b.amt-a.amt).forEach(c=>{
-    const sumD=c.rows.reduce((s,r)=>s+r.debit,0),sumC=c.rows.reduce((s,r)=>s+r.credit,0);
-    const el=document.createElement('div');el.className='acc-item';
-    el.innerHTML='<button class="acc-head"><span class="acc-ic"><i class="fa-solid '+c.icon+'"></i></span><span class="acc-name">'+c.name+'</span><span class="acc-count">'+c.rows.length+' سند</span><b class="acc-total">'+fmt(c.amt)+'</b><i class="fa-solid fa-chevron-down acc-chev"></i></button>'+
-    '<div class="acc-body"><div class="acc-inner"><div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>السند</th><th>البيان</th><th>المبلغ</th></tr></thead><tbody>'+
-    c.rows.map(r=>'<tr><td>'+iso(r.date)+'</td><td>'+r.voucher+'</td><td>'+r.stmt+'</td><td class="amt">'+fmt(r.debit-r.credit)+'</td></tr>').join('')+
-    '</tbody><tfoot><tr><td colspan="3">مجموع مدين: '+fmt(sumD)+' − مجموع دائن: '+fmt(sumC)+'</td><td class="amt">'+fmt(c.amt)+'</td></tr></tfoot></table></div></div></div>';
-    el.querySelector('.acc-head').onclick=()=>el.classList.toggle('open');
-    box.appendChild(el);
+    box.appendChild(detailItem(c.name,c.icon,c.rows,c.amt,false));
   });
+  /* ✅ إيرادات مختلفة + تدوير قيم وتفاصيلها */
+  box.appendChild(detailItem('إيرادات مختلفة + تدوير قيم','fa-coins',st.oiRows,st.otherIncome,true));
+  /* ✅ الحسم المكتسب وتفاصيله */
+  box.appendChild(detailItem('الحسم المكتسب','fa-percent',st.enRows,st.earned,true));
 }
 
 function renderChart(selKey){
