@@ -31,6 +31,14 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .card-head h2{font-size:14.5px;font-weight:900;display:flex;gap:8px;align-items:center;color:#1e293b}
 .card-head h2 i{color:#4f46e5}
 .hint{font-size:10px;color:#94a3b8;font-weight:700;margin-top:4px}
+/* ✅ طيّ هادئ للقوائم */
+.collapse-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .45s ease}
+.collapsed .collapse-body{grid-template-rows:0fr}
+.collapse-inner{overflow:hidden}
+.tgl{width:30px;height:30px;padding:0;justify-content:center}
+.tgl i{transition:.3s}
+.collapsed .tgl i{transform:rotate(180deg)}
+.collapsed{padding:10px 16px}
 .file-list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
 .file-item{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:12px;display:flex;gap:10px;align-items:center;transition:.2s}
 .file-item:hover{border-color:#c7d2fe;box-shadow:0 6px 16px rgba(79,70,229,.12)}
@@ -43,23 +51,8 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .fi-mini em{font-style:normal}.fi-mini b{display:inline;color:#059669}
 .fi-actions{display:flex;gap:6px;flex-shrink:0}
 .empty{color:#94a3b8;font-size:12px;text-align:center;padding:14px}
-.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
-.f-group label{font-size:11px;font-weight:800;color:#64748b;display:block;margin-bottom:4px}
-.f-group input{border:1.5px solid #e2e8f0;background:#fff;border-radius:12px;padding:9px 12px;font-family:'Cairo';font-size:13px;font-weight:700}
-.chip{background:#eef2ff;color:#4f46e5;border-radius:999px;padding:9px 14px;font-size:11px;font-weight:800}
-.chip.day{background:#fffbeb;color:#d97706}
-/* ✅ شريط اختيار سريع مرتّب وبسيط */
-.quick-range{display:flex;gap:8px;overflow-x:auto;width:100%;padding:8px 2px 2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.quick-range::-webkit-scrollbar{display:none}
-.qr-chip{flex-shrink:0;border:1.5px solid #e2e8f0;background:#fff;border-radius:999px;padding:8px 16px;font-family:'Cairo';font-size:11px;font-weight:800;color:#475569;cursor:pointer;transition:.15s}
-.qr-chip:hover{border-color:#c7d2fe;color:#4f46e5}
-.qr-chip.on{background:#4f46e5;color:#fff;border-color:#4f46e5;box-shadow:0 4px 12px rgba(79,70,229,.3)}
-/* ✅ طيّ قائمة المستودع */
-#repoCard.collapsed{padding:10px 16px}
-#repoCard.collapsed #repoList{display:none}
-#repoToggle{width:30px;height:30px;padding:0;justify-content:center}
-#repoToggle i{transition:.3s}
-#repoCard.collapsed #repoToggle i{transform:rotate(180deg)}
+/* ✅ تحديد الشهر */
+.sel{border:1.5px solid #e2e8f0;background:#fff;border-radius:12px;padding:9px 14px;font-family:'Cairo';font-size:13px;font-weight:800;color:#0f172a;cursor:pointer}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}
 .kpi{background:#f8f9fd;border-radius:18px;box-shadow:0 8px 24px rgba(15,23,42,.06);padding:14px;position:relative;overflow:hidden}
 .kpi::after{content:'';position:absolute;inset-inline-end:0;top:12px;bottom:12px;width:4px;border-radius:4px;background:var(--c)}
@@ -67,10 +60,10 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .kpi .ic{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.7);color:var(--c);display:grid;place-items:center;font-size:14px;box-shadow:inset 0 0 0 1.5px var(--c)}
 .kpi .v{font-size:18px;font-weight:900;margin-top:8px}
 .kpi .s{font-size:9.5px;color:#94a3b8;font-weight:700}
+.stmt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+.stmt-grid .kpi .v{font-size:14.5px}
 .grid2{display:grid;grid-template-columns:1fr;gap:14px}
 @media(min-width:950px){.grid2{grid-template-columns:1fr 1fr}}
-.stmt .row{display:flex;justify-content:space-between;align-items:center;padding:10px 4px;border-bottom:1.5px dashed #e2e8f0;font-size:12.5px;font-weight:700}
-.stmt .row b{font-weight:900}
 .pos{color:#059669}.neg{color:#e11d48}
 .total-btn{margin-top:14px;background:linear-gradient(135deg,#059669,#0d9488);color:#fff;border-radius:16px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:14px;box-shadow:0 10px 24px rgba(5,150,105,.35)}
 #chartCard,#chartCard *{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
@@ -135,62 +128,61 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 </header>
 
 <main>
-  <section class="card">
-    <div class="card-head"><h2><i class="fa-solid fa-folder-open"></i> قائمة الملفات المحفوظة محلياً (الأساسية)</h2></div>
-    <div id="localList" class="file-list"><div class="empty">لا توجد ملفات محفوظة بعد — اضغط "تحديث من المستودع" ثم افتح ملفاً واحفظه</div></div>
+  <!-- ✅ قائمة الملفات المحلية: عنوان + سهم تفاعلي + طيّ هادئ تلقائي -->
+  <section class="card" id="localCard">
+    <div class="card-head">
+      <h2><i class="fa-solid fa-folder-open"></i> قائمة الملفات المحفوظة محلياً (الأساسية)</h2>
+      <button class="btn btn-sm btn-ghost tgl" id="localToggle" title="إظهار/إخفاء"><i class="fa-solid fa-chevron-up"></i></button>
+    </div>
+    <div class="collapse-body"><div class="collapse-inner">
+      <div id="localList" class="file-list"><div class="empty">لا توجد ملفات محفوظة بعد — اضغط "تحديث من المستودع" ثم افتح ملفاً واحفظه</div></div>
+    </div></div>
   </section>
 
-  <section class="card hidden" id="repoCard">
+  <section class="card hidden collapsed" id="repoCard">
     <div class="card-head">
       <h2><i class="fa-brands fa-github"></i> ملفات المستودع (اضغط فتح ثم حفظ)</h2>
-      <button class="btn btn-sm btn-ghost" id="repoToggle" title="إظهار/إخفاء"><i class="fa-solid fa-chevron-up"></i></button>
+      <button class="btn btn-sm btn-ghost tgl" id="repoToggle" title="إظهار/إخفاء"><i class="fa-solid fa-chevron-up"></i></button>
     </div>
-    <div id="repoList" class="file-list"></div>
+    <div class="collapse-body"><div class="collapse-inner">
+      <div id="repoList" class="file-list"></div>
+    </div></div>
   </section>
 
+  <!-- ✅ تحديد الشهر فقط -->
   <section class="card hidden" id="filterCard">
-    <div class="filters">
-      <div class="f-group"><label>من تاريخ</label><input type="date" id="dFrom"></div>
-      <div class="f-group"><label>إلى تاريخ</label><input type="date" id="dTo"></div>
-      <button class="btn btn-indigo" id="btnApply"><i class="fa-solid fa-filter"></i> تطبيق</button>
-      <button class="btn btn-ghost" id="btnFull"><i class="fa-solid fa-calendar-days"></i> الشهر كامل</button>
-      <span class="chip" id="rangeChip"></span>
-      <span class="chip" id="fileChip" style="background:#ecfdf5;color:#059669"></span>
+    <div class="card-head">
+      <h2><i class="fa-solid fa-calendar-days"></i> تحديد الفترة</h2>
+      <select id="monthSel" class="sel"></select>
     </div>
-    <div class="quick-range" id="quickRange"></div>
   </section>
 
+  <!-- ✅ 4 كروت فقط -->
   <section class="kpis hidden" id="kpis">
     <div class="kpi" style="--c:#4f46e5"><div class="t"><span class="ic"><i class="fa-solid fa-bag-shopping"></i></span>إجمالي المبيعات</div><div class="v" id="kSales">0</div><div class="s" id="kSalesS"></div></div>
-    <div class="kpi" style="--c:#e11d48"><div class="t"><span class="ic"><i class="fa-solid fa-rotate-left"></i></span>مردودات المبيعات</div><div class="v neg" id="kRet">0</div><div class="s" id="kRetS"></div></div>
-    <div class="kpi" style="--c:#d97706"><div class="t"><span class="ic"><i class="fa-solid fa-tags"></i></span>الحسم الممنوح</div><div class="v neg" id="kDisc">0</div><div class="s" id="kDiscS"></div></div>
     <div class="kpi" style="--c:#0d9488"><div class="t"><span class="ic"><i class="fa-solid fa-wallet"></i></span>صافي المبيعات</div><div class="v" id="kNet">0</div><div class="s">الإجمالي − المردودات − الحسم</div></div>
-    <div class="kpi" style="--c:#be185d"><div class="t"><span class="ic"><i class="fa-solid fa-percent"></i></span>الحسم المكتسب</div><div class="v neg" id="kEarn">0</div><div class="s">يُطرح من تكلفة البضاعة</div></div>
-    <div class="kpi" style="--c:#ea580c"><div class="t"><span class="ic"><i class="fa-solid fa-boxes-stacked"></i></span>تكلفة البضاعة المباعة</div><div class="v" id="kCogs">0</div><div class="s">مدين − دائن</div></div>
-    <div class="kpi" style="--c:#b45309"><div class="t"><span class="ic"><i class="fa-solid fa-cart-flatbed"></i></span>تكلفة المبيعات</div><div class="v" id="kCogsNet">0</div><div class="s">البضاعة − المكتسب</div></div>
-    <div class="kpi" style="--c:#7c3aed"><div class="t"><span class="ic"><i class="fa-solid fa-chart-simple"></i></span>مجمل الدخل</div><div class="v" id="kGross">0</div><div class="s">صافي المبيعات − تكلفة المبيعات</div></div>
-    <div class="kpi" style="--c:#059669"><div class="t"><span class="ic"><i class="fa-solid fa-coins"></i></span>إيرادات مختلفة</div><div class="v pos" id="kOther">0</div><div class="s" id="kOtherS"></div></div>
     <div class="kpi" style="--c:#e11d48"><div class="t"><span class="ic"><i class="fa-solid fa-receipt"></i></span>إجمالي المصاريف</div><div class="v neg" id="kExp">0</div><div class="s" id="kExpS"></div></div>
     <div class="kpi" style="--c:#059669"><div class="t"><span class="ic"><i class="fa-solid fa-sack-dollar"></i></span>صافي الدخل</div><div class="v pos" id="kNetInc">0</div><div class="s">مجمل + إيرادات − مصاريف</div></div>
   </section>
 
   <div class="grid2">
+    <!-- ✅ قائمة الدخل بنفس شكل الكروت -->
     <section class="card hidden" id="stmtCard">
       <div class="card-head"><h2><i class="fa-solid fa-file-invoice-dollar"></i> قائمة الدخل</h2></div>
-      <div class="stmt" style="margin-top:10px">
-        <div class="row"><span>(+) إجمالي المبيعات</span><b class="pos" id="s1">0</b></div>
-        <div class="row"><span>(−) مردودات المبيعات</span><b class="neg" id="s2">0</b></div>
-        <div class="row"><span>(−) الحسم الممنوح</span><b class="neg" id="s3">0</b></div>
-        <div class="row"><span>(=) صافي المبيعات</span><b id="s4">0</b></div>
-        <div class="row"><span>(−) الحسم المكتسب</span><b class="neg" id="s4b">0</b></div>
-        <div class="row"><span>(−) تكلفة البضاعة المباعة</span><b class="neg" id="s5">0</b></div>
-        <div class="row"><span>(=) تكلفة المبيعات</span><b id="s5b">0</b></div>
-        <div class="row"><span>(=) مجمل الدخل</span><b id="s6">0</b></div>
-        <div class="row"><span>(+) إيرادات مختلفة</span><b class="pos" id="s7">0</b></div>
-        <div class="row"><span>(=) الإجمالي بعد الإيرادات</span><b id="s8">0</b></div>
-        <div class="row"><span>(−) إجمالي المصاريف</span><b class="neg" id="s9">0</b></div>
-        <div class="total-btn"><span>صافي الدخل النهائي</span><b id="s10">0</b></div>
+      <div class="stmt-grid">
+        <div class="kpi" style="--c:#4f46e5"><div class="t"><span class="ic"><i class="fa-solid fa-bag-shopping"></i></span>(+) إجمالي المبيعات</div><div class="v" id="s1">0</div></div>
+        <div class="kpi" style="--c:#e11d48"><div class="t"><span class="ic"><i class="fa-solid fa-rotate-left"></i></span>(−) مردودات المبيعات</div><div class="v neg" id="s2">0</div></div>
+        <div class="kpi" style="--c:#d97706"><div class="t"><span class="ic"><i class="fa-solid fa-tags"></i></span>(−) الحسم الممنوح</div><div class="v neg" id="s3">0</div></div>
+        <div class="kpi" style="--c:#0d9488"><div class="t"><span class="ic"><i class="fa-solid fa-wallet"></i></span>(=) صافي المبيعات</div><div class="v" id="s4">0</div></div>
+        <div class="kpi" style="--c:#be185d"><div class="t"><span class="ic"><i class="fa-solid fa-percent"></i></span>(−) الحسم المكتسب</div><div class="v neg" id="s4b">0</div></div>
+        <div class="kpi" style="--c:#ea580c"><div class="t"><span class="ic"><i class="fa-solid fa-boxes-stacked"></i></span>(−) تكلفة البضاعة</div><div class="v" id="s5">0</div></div>
+        <div class="kpi" style="--c:#b45309"><div class="t"><span class="ic"><i class="fa-solid fa-cart-flatbed"></i></span>(=) تكلفة المبيعات</div><div class="v" id="s5b">0</div></div>
+        <div class="kpi" style="--c:#7c3aed"><div class="t"><span class="ic"><i class="fa-solid fa-chart-simple"></i></span>(=) مجمل الدخل</div><div class="v" id="s6">0</div></div>
+        <div class="kpi" style="--c:#059669"><div class="t"><span class="ic"><i class="fa-solid fa-coins"></i></span>(+) إيرادات مختلفة</div><div class="v pos" id="s7">0</div></div>
+        <div class="kpi" style="--c:#059669"><div class="t"><span class="ic"><i class="fa-solid fa-equals"></i></span>(=) الإجمالي بعد الإيرادات</div><div class="v" id="s8">0</div></div>
+        <div class="kpi" style="--c:#e11d48"><div class="t"><span class="ic"><i class="fa-solid fa-receipt"></i></span>(−) إجمالي المصاريف</div><div class="v neg" id="s9">0</div></div>
       </div>
+      <div class="total-btn"><span>صافي الدخل النهائي</span><b id="s10">0</b></div>
     </section>
     <section class="card hidden" id="chartCard" oncontextmenu="return false">
       <div class="card-head">
@@ -254,8 +246,8 @@ const KNOWN_FILES=[
 const rawUrl=n=>'https://raw.githubusercontent.com/'+REPO+'/main/'+encodeURI(n);
 
 let RAW=null, CURRENT=null, CHART=null;
-let chartFrom=null, chartTo=null, selectedDay=null, selectedMonth=null;
-let repoTimer=null;
+let chartFrom=null, chartTo=null, selectedDay=null;
+let repoTimer=null, localTimer=null;
 
 function idbOpen(){return new Promise((res,rej)=>{const q=indexedDB.open('asbakk-db',1);q.onupgradeneeded=()=>{const db=q.result;if(!db.objectStoreNames.contains('files'))db.createObjectStore('files',{keyPath:'id'});};q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});}
 async function idbAll(){const db=await idbOpen();return new Promise((res,rej)=>{const r=db.transaction('files','readonly').objectStore('files').getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error);});}
@@ -339,30 +331,23 @@ function monthsBetween(from,to){
 function monthsInRange(){return monthsBetween(chartFrom,chartTo);}
 function isMonthMode(){return monthsInRange().length>1;}
 
-/* ✅ إظهار/طيّ قائمة المستودع مع إخفاء تلقائي بعد 3 ثوانٍ */
+/* ✅ طيّ/فتح القائمة المحلية بهدوء مع إخفاء تلقائي */
+function localExpand(auto){
+  const c=$('#localCard');c.classList.remove('collapsed');
+  clearTimeout(localTimer);
+  if(auto)localTimer=setTimeout(()=>c.classList.add('collapsed'),4000);
+}
+/* ✅ طيّ/فتح قائمة المستودع */
 function repoShow(auto){
   const c=$('#repoCard');c.classList.remove('hidden');c.classList.remove('collapsed');
   clearTimeout(repoTimer);
   if(auto)repoTimer=setTimeout(()=>c.classList.add('collapsed'),3000);
 }
 
-/* ✅ شريط الاختيار السريع المرتّب */
-function renderQuick(){
-  const box=$('#quickRange');if(!box||!RAW)return;
+function setMonth(key){
   const[mn,mx]=fullRange();if(!mn)return;
-  box.innerHTML='';
-  const full=document.createElement('button');
-  full.className='qr-chip'+(iso(chartFrom)===iso(mn)&&iso(chartTo)===iso(mx)?' on':'');
-  full.textContent='الفترة كاملة';
-  full.onclick=()=>resetRange();
-  box.appendChild(full);
-  monthsBetween(mn,mx).forEach(m=>{
-    const b=document.createElement('button');
-    b.className='qr-chip'+(iso(chartFrom)===iso(m.from)&&iso(chartTo)===iso(m.to)?' on':'');
-    b.textContent=m.key;
-    b.onclick=()=>{chartFrom=m.from;chartTo=m.to;selectedDay=null;selectedMonth=null;$('#dFrom').value=iso(m.from);$('#dTo').value=iso(m.to);renderAll();};
-    box.appendChild(b);
-  });
+  const m=monthsBetween(mn,mx).find(x=>x.key===key);if(!m)return;
+  chartFrom=m.from;chartTo=m.to;selectedDay=null;renderAll();
 }
 
 function detailItem(name,icon,rows,net,income){
@@ -376,23 +361,25 @@ function detailItem(name,icon,rows,net,income){
   return el;
 }
 
+/* ✅ قائمة تحديد الشهر */
+function renderMonthSel(){
+  const sel=$('#monthSel');if(!sel||!RAW)return;
+  const[mn,mx]=fullRange();if(!mn)return;
+  const ms=monthsBetween(mn,mx);
+  const f=iso(chartFrom),t=iso(chartTo);
+  const cur=(ms.find(m=>iso(m.from)===f&&iso(m.to)===t)||{}).key||'all';
+  sel.innerHTML='<option value="all">📅 الكل (الفترة كاملة)</option>'+ms.map(m=>'<option value="'+m.key+'">شهر '+m.key+'</option>').join('');
+  sel.value=cur;
+}
+
 function renderAll(){
   if(!RAW||!chartFrom)return;
   ['filterCard','kpis','stmtCard','chartCard','expCard'].forEach(id=>$('#'+id).classList.remove('hidden'));
   const selKey=selectedDay?iso(selectedDay):null;
-  const selMKey=selectedMonth?selectedMonth.key:null;
-  const f=selectedDay?selectedDay:(selectedMonth?selectedMonth.from:chartFrom);
-  const t=selectedDay?selectedDay:(selectedMonth?selectedMonth.to:chartTo);
+  const f=selectedDay||chartFrom,t=selectedDay||chartTo;
   const st=computeStats(f,t);
   anim($('#kSales'),st.sales);$('#kSalesS').textContent=st.counts.s+' فاتورة';
-  anim($('#kRet'),st.ret);$('#kRetS').textContent=st.counts.r+' سند';
-  anim($('#kDisc'),st.disc);$('#kDiscS').textContent=st.counts.d+' سند';
   anim($('#kNet'),st.netSales);
-  anim($('#kEarn'),st.earned);
-  anim($('#kCogs'),st.cogs);
-  anim($('#kCogsNet'),st.costOfSales);
-  anim($('#kGross'),st.gross);
-  anim($('#kOther'),st.otherIncome);$('#kOtherS').textContent=st.counts.oi+' قيد (مع تدوير القيم)';
   anim($('#kExp'),st.expenses);$('#kExpS').textContent=st.counts.e+' سند';
   anim($('#kNetInc'),st.net);
   $('#s1').textContent=fmt(st.sales);$('#s2').textContent=fmt(st.ret);$('#s3').textContent=fmt(st.disc);
@@ -400,12 +387,8 @@ function renderAll(){
   $('#s5').textContent=fmt(st.cogs);$('#s5b').textContent=fmt(st.costOfSales);
   $('#s6').textContent=fmt(st.gross);
   $('#s7').textContent=fmt(st.otherIncome);$('#s8').textContent=fmt(st.gross+st.otherIncome);$('#s9').textContent=fmt(st.expenses);$('#s10').textContent=fmt(st.net);
-  const rc=$('#rangeChip');
-  if(selKey){rc.textContent='📅 يوم محدد: '+selKey;rc.classList.add('day');}
-  else if(selMKey){rc.textContent='📅 شهر محدد: '+selMKey;rc.classList.add('day');}
-  else{rc.textContent='الفترة: '+iso(chartFrom)+' ← '+iso(chartTo);rc.classList.remove('day');}
-  $('#fileChip').textContent='الملف: '+CURRENT.name;
-  renderChart(selKey,selMKey);renderDayButtonState(selKey,selMKey);renderQuick();
+  renderMonthSel();
+  renderChart(selKey);renderDayButtonState(selKey);
   const box=$('#expList');box.innerHTML='';
   CATS.map(c=>st.catMap[c[0]]).sort((a,b)=>b.amt-a.amt).forEach(c=>{
     box.appendChild(detailItem(c.name,c.icon,c.rows,c.amt,false));
@@ -414,18 +397,18 @@ function renderAll(){
   box.appendChild(detailItem('الحسم المكتسب','fa-percent',st.enRows,st.earned,true));
 }
 
-function renderChart(selKey,selMKey){
+function renderChart(selKey){
   const daily=computeDaily(chartFrom,chartTo);
   const days=Object.keys(daily).sort();
   const labels=days.map(d=>{const p=d.split('-');return p[2]+'/'+p[1];});
-  const barColors=days.map(d=>(d===selKey||(selMKey&&d.startsWith(selMKey)))?'#f59e0b':'#4f46e5');
+  const barColors=days.map(d=>d===selKey?'#f59e0b':'#4f46e5');
   if(CHART)CHART.destroy();
   if(typeof Chart==='undefined')return;
   CHART=new Chart($('#chart'),{data:{labels:labels,datasets:[
     {type:'bar',label:'المبيعات',data:days.map(d=>daily[d].s),backgroundColor:barColors,borderRadius:3,barPercentage:.95,categoryPercentage:.85},
     {type:'line',label:'المصاريف',data:days.map(d=>daily[d].e),borderColor:'#e11d48',backgroundColor:'#e11d48',borderWidth:1.5,pointRadius:2,tension:.3}]},
     options:{responsive:true,maintainAspectRatio:false,animation:false,
-      onClick:(evt,els)=>{if(els.length&&els[0].datasetIndex===0){const d=days[els[0].index];if(isMonthMode())toggleMonth(d.slice(0,7));else toggleDay(d);}},
+      onClick:(evt,els)=>{if(els.length&&els[0].datasetIndex===0){const d=days[els[0].index];if(isMonthMode())setMonth(d.slice(0,7));else toggleDay(d);}},
       onHover:(evt,els)=>{if(evt.native&&evt.native.target)evt.native.target.style.cursor=(els.length&&els[0].datasetIndex===0)?'pointer':'default';},
       plugins:{legend:{labels:{font:{family:'Cairo',weight:700,size:10},boxWidth:12,boxHeight:12}},
         tooltip:{titleFont:{family:'Cairo'},bodyFont:{family:'Cairo'},callbacks:{title:items=>'اليوم: '+days[items[0].dataIndex],label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},
@@ -433,32 +416,17 @@ function renderChart(selKey,selMKey){
         y:{grid:{color:'#eef1f8'},ticks:{font:{family:'Cairo',size:9},callback:v=>fmtShort(v)}}}}});
 }
 function toggleDay(key){
-  selectedMonth=null;
-  if(selectedDay&&iso(selectedDay)===key){selectedDay=null;$('#dFrom').value=iso(chartFrom);$('#dTo').value=iso(chartTo);toast('تم إلغاء تحديد اليوم');}
-  else{selectedDay=new Date(key+'T00:00:00');$('#dFrom').value=key;$('#dTo').value=key;toast('تم تحديد يوم: '+key);}
+  if(selectedDay&&iso(selectedDay)===key){selectedDay=null;toast('تم إلغاء تحديد اليوم');}
+  else{selectedDay=new Date(key+'T00:00:00');toast('تم تحديد يوم: '+key);}
   renderAll();
-}
-function toggleMonth(key){
-  selectedDay=null;
-  if(selectedMonth&&selectedMonth.key===key){selectedMonth=null;$('#dFrom').value=iso(chartFrom);$('#dTo').value=iso(chartTo);toast('تم إلغاء تحديد الشهر');}
-  else{const m=monthsInRange().find(x=>x.key===key);if(!m)return;selectedMonth=m;$('#dFrom').value=iso(m.from);$('#dTo').value=iso(m.to);toast('تم تحديد شهر: '+key);}
-  renderAll();
-}
-function apply(){
-  if(!RAW)return;
-  let f=new Date($('#dFrom').value+'T00:00:00'),t=new Date($('#dTo').value+'T23:59:59');
-  if(isNaN(f)||isNaN(t))return;
-  if(f>t)[f,t]=[t,f];
-  chartFrom=f;chartTo=t;selectedDay=null;selectedMonth=null;renderAll();
 }
 function resetRange(){
   const[mn,mx]=fullRange();if(!mn)return;
-  chartFrom=mn;chartTo=mx;selectedDay=null;selectedMonth=null;
-  $('#dFrom').value=iso(mn);$('#dTo').value=iso(mx);renderAll();
+  chartFrom=mn;chartTo=mx;selectedDay=null;renderAll();
 }
-function renderDayButtonState(selKey,selMKey){
+function renderDayButtonState(selKey){
   const btn=$('#dayBtn');
-  if(selKey||selMKey){btn.classList.add('on');btn.title=selKey?('اليوم: '+selKey):('الشهر: '+selMKey);}
+  if(selKey){btn.classList.add('on');btn.title='اليوم: '+selKey;}
   else{btn.classList.remove('on');btn.title='اختر فترة';}
 }
 function openPop(){
@@ -470,9 +438,9 @@ function openPop(){
   if(mm){
     monthsInRange().forEach(m=>{
       const b=document.createElement('button');
-      b.className='day-cell'+(selectedMonth&&selectedMonth.key===m.key?' on':'');
+      b.className='day-cell';
       b.textContent=m.key;
-      b.onclick=e=>{e.stopPropagation();toggleMonth(m.key);closePop();};
+      b.onclick=e=>{e.stopPropagation();setMonth(m.key);closePop();};
       grid.appendChild(b);
     });
   }else{
@@ -490,10 +458,17 @@ function openPop(){
 }
 function closePop(){$('#dayPop').classList.remove('open');}
 $('#dayBtn').onclick=e=>{e.stopPropagation();const p=$('#dayPop');if(p.classList.contains('open'))closePop();else openPop();};
-$('#dayClear').onclick=e=>{e.stopPropagation();if(selectedDay||selectedMonth){selectedDay=null;selectedMonth=null;$('#dFrom').value=iso(chartFrom);$('#dTo').value=iso(chartTo);toast('تم إلغاء التحديد');renderAll();}closePop();};
+$('#dayClear').onclick=e=>{e.stopPropagation();if(selectedDay){selectedDay=null;toast('تم إلغاء التحديد');renderAll();}closePop();};
 document.addEventListener('click',e=>{const p=$('#dayPop'),b=$('#dayBtn');if(p&&p.classList.contains('open')&&!p.contains(e.target)&&!b.contains(e.target))closePop();});
 
-/* ✅ زر السهم لقائمة المستودع + لمس القائمة يلغي الإخفاء التلقائي */
+/* ✅ قائمة تحديد الشهر */
+$('#monthSel').onchange=e=>{
+  const v=e.target.value;
+  if(v==='all')resetRange();else setMonth(v);
+};
+/* ✅ الأسهم التفاعلية */
+$('#localToggle').onclick=e=>{e.stopPropagation();clearTimeout(localTimer);$('#localCard').classList.toggle('collapsed');};
+$('#localCard').addEventListener('pointerdown',()=>clearTimeout(localTimer));
 $('#repoToggle').onclick=e=>{e.stopPropagation();clearTimeout(repoTimer);$('#repoCard').classList.toggle('collapsed');};
 $('#repoCard').addEventListener('pointerdown',()=>clearTimeout(repoTimer));
 
@@ -541,8 +516,8 @@ async function refreshRepo(){
     }catch(e){apiFailed=true;}
   }
   if(!items.length)items=await probeKnown();
+  repoShow(true);
   const box=$('#repoList');
-  repoShow(true);   /* ✅ تظهر ثم تنطوي بعد 3 ثوانٍ ويبقى السهم */
   if(!items.length){
     box.innerHTML='<div class="empty">'+(apiFailed?'تعذّر الاتصال بالمستودع (حد الطلبات) — أعد المحاولة بعد دقيقة':'لا توجد ملفات Excel في المستودع')+'</div>';
     ovHide();return[];
@@ -572,14 +547,12 @@ async function openURL(url,name){
   }catch(e){ovHide();toast('فشل فتح الملف: '+((e&&e.message)?e.message:'تحقق من الإنترنت'));}
 }
 $('#btnRepo').onclick=refreshRepo;
-$('#btnApply').onclick=apply;
-$('#btnFull').onclick=resetRange;
 $('#btnSave').onclick=async()=>{
   if(!RAW||!CURRENT){toast('لا يوجد ملف مفتوح للحفظ');return;}
   const[mn,mx]=fullRange();const st=computeStats(mn,mx);
   const item={id:CURRENT.name,name:CURRENT.name,savedAt:new Date().toISOString(),data:serializeRAW(),
     meta:{sales:st.sales,ret:st.ret,disc:st.disc,earned:st.earned,cogs:st.cogs,otherIncome:st.otherIncome,expenses:st.expenses,net:st.net,counts:st.counts}};
-  try{await idbPut(item);await renderLocal();toast('✔ تم حفظ "'+CURRENT.name+'" في قائمة الملفات');}
+  try{await idbPut(item);await renderLocal();localExpand(false);toast('✔ تم حفظ "'+CURRENT.name+'" في قائمة الملفات');}
   catch(e){toast('تعذّر الحفظ');}
 };
 
@@ -587,6 +560,7 @@ $('#btnSave').onclick=async()=>{
   try{
     const items=(await idbAll()).sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||''));
     await renderLocal();
+    localExpand(true);   /* ✅ تظهر بهدوء ثم تنطوي بعد 4 ثوانٍ */
     if(items.length){RAW=deserializeRAW(items[0].data);CURRENT={name:items[0].name};resetRange();}
     else{const files=await refreshRepo();if(files&&files.length)await openURL(files[0].download_url,files[0].name);}
   }catch(e){}
