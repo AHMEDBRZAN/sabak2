@@ -31,7 +31,6 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .card-head h2{font-size:14.5px;font-weight:900;display:flex;gap:8px;align-items:center;color:#1e293b}
 .card-head h2 i{color:#4f46e5}
 .hint{font-size:10px;color:#94a3b8;font-weight:700;margin-top:4px}
-/* ✅ طيّ هادئ للقوائم */
 .collapse-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .45s ease}
 .collapsed .collapse-body{grid-template-rows:0fr}
 .collapse-inner{overflow:hidden}
@@ -51,7 +50,6 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .fi-mini em{font-style:normal}.fi-mini b{display:inline;color:#059669}
 .fi-actions{display:flex;gap:6px;flex-shrink:0}
 .empty{color:#94a3b8;font-size:12px;text-align:center;padding:14px}
-/* ✅ تحديد الشهر */
 .sel{border:1.5px solid #e2e8f0;background:#fff;border-radius:12px;padding:9px 14px;font-family:'Cairo';font-size:13px;font-weight:800;color:#0f172a;cursor:pointer}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}
 .kpi{background:#f8f9fd;border-radius:18px;box-shadow:0 8px 24px rgba(15,23,42,.06);padding:14px;position:relative;overflow:hidden}
@@ -60,12 +58,20 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .kpi .ic{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.7);color:var(--c);display:grid;place-items:center;font-size:14px;box-shadow:inset 0 0 0 1.5px var(--c)}
 .kpi .v{font-size:18px;font-weight:900;margin-top:8px}
 .kpi .s{font-size:9.5px;color:#94a3b8;font-weight:700}
-.stmt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
-.stmt-grid .kpi .v{font-size:14.5px}
-.grid2{display:grid;grid-template-columns:1fr;gap:14px}
-@media(min-width:950px){.grid2{grid-template-columns:1fr 1fr}}
+/* ✅ قائمة الدخل: ترتيب عمودي سابق + جماليات جديدة */
+.stmt{margin-top:12px;display:flex;flex-direction:column;gap:7px}
+.stmt .row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff;border:1px solid #eef1f8;border-radius:14px;padding:10px 14px;font-size:12.5px;font-weight:800;position:relative;overflow:hidden;transition:.2s}
+.stmt .row::before{content:'';position:absolute;inset-inline-start:0;top:8px;bottom:8px;width:4px;border-radius:4px;background:var(--rc,#94a3b8)}
+.stmt .row:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(15,23,42,.08);border-color:#e0e7ff}
+.stmt .row .lb{display:flex;align-items:center;gap:9px;color:#475569}
+.stmt .row .lb i{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;font-size:11px;color:var(--rc);background:#f8fafc;box-shadow:inset 0 0 0 1.5px var(--rc);flex-shrink:0}
+.stmt .row b{font-weight:900;font-size:13px}
+.stmt .row.eq{background:#f5f8ff;border-color:#e0e7ff}
+.stmt .row.eq .lb{color:#4338ca}
 .pos{color:#059669}.neg{color:#e11d48}
 .total-btn{margin-top:14px;background:linear-gradient(135deg,#059669,#0d9488);color:#fff;border-radius:16px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:14px;box-shadow:0 10px 24px rgba(5,150,105,.35)}
+.grid2{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:950px){.grid2{grid-template-columns:1fr 1fr}}
 #chartCard,#chartCard *{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 .acc-item{background:#fff;border:1px solid #e2e8f0;border-radius:14px;margin-top:10px;overflow:hidden}
 .acc-head{width:100%;border:none;background:#fff;display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;font-family:'Cairo'}
@@ -128,7 +134,6 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 </header>
 
 <main>
-  <!-- ✅ قائمة الملفات المحلية: عنوان + سهم تفاعلي + طيّ هادئ تلقائي -->
   <section class="card" id="localCard">
     <div class="card-head">
       <h2><i class="fa-solid fa-folder-open"></i> قائمة الملفات المحفوظة محلياً (الأساسية)</h2>
@@ -149,7 +154,6 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
     </div></div>
   </section>
 
-  <!-- ✅ تحديد الشهر فقط -->
   <section class="card hidden" id="filterCard">
     <div class="card-head">
       <h2><i class="fa-solid fa-calendar-days"></i> تحديد الفترة</h2>
@@ -157,7 +161,6 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
     </div>
   </section>
 
-  <!-- ✅ 4 كروت فقط -->
   <section class="kpis hidden" id="kpis">
     <div class="kpi" style="--c:#4f46e5"><div class="t"><span class="ic"><i class="fa-solid fa-bag-shopping"></i></span>إجمالي المبيعات</div><div class="v" id="kSales">0</div><div class="s" id="kSalesS"></div></div>
     <div class="kpi" style="--c:#0d9488"><div class="t"><span class="ic"><i class="fa-solid fa-wallet"></i></span>صافي المبيعات</div><div class="v" id="kNet">0</div><div class="s">الإجمالي − المردودات − الحسم</div></div>
@@ -166,23 +169,23 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
   </section>
 
   <div class="grid2">
-    <!-- ✅ قائمة الدخل بنفس شكل الكروت -->
+    <!-- ✅ قائمة الدخل: الترتيب العمودي السابق + تصميم أجمل -->
     <section class="card hidden" id="stmtCard">
       <div class="card-head"><h2><i class="fa-solid fa-file-invoice-dollar"></i> قائمة الدخل</h2></div>
-      <div class="stmt-grid">
-        <div class="kpi" style="--c:#4f46e5"><div class="t"><span class="ic"><i class="fa-solid fa-bag-shopping"></i></span>(+) إجمالي المبيعات</div><div class="v" id="s1">0</div></div>
-        <div class="kpi" style="--c:#e11d48"><div class="t"><span class="ic"><i class="fa-solid fa-rotate-left"></i></span>(−) مردودات المبيعات</div><div class="v neg" id="s2">0</div></div>
-        <div class="kpi" style="--c:#d97706"><div class="t"><span class="ic"><i class="fa-solid fa-tags"></i></span>(−) الحسم الممنوح</div><div class="v neg" id="s3">0</div></div>
-        <div class="kpi" style="--c:#0d9488"><div class="t"><span class="ic"><i class="fa-solid fa-wallet"></i></span>(=) صافي المبيعات</div><div class="v" id="s4">0</div></div>
-        <div class="kpi" style="--c:#be185d"><div class="t"><span class="ic"><i class="fa-solid fa-percent"></i></span>(−) الحسم المكتسب</div><div class="v neg" id="s4b">0</div></div>
-        <div class="kpi" style="--c:#ea580c"><div class="t"><span class="ic"><i class="fa-solid fa-boxes-stacked"></i></span>(−) تكلفة البضاعة</div><div class="v" id="s5">0</div></div>
-        <div class="kpi" style="--c:#b45309"><div class="t"><span class="ic"><i class="fa-solid fa-cart-flatbed"></i></span>(=) تكلفة المبيعات</div><div class="v" id="s5b">0</div></div>
-        <div class="kpi" style="--c:#7c3aed"><div class="t"><span class="ic"><i class="fa-solid fa-chart-simple"></i></span>(=) مجمل الدخل</div><div class="v" id="s6">0</div></div>
-        <div class="kpi" style="--c:#059669"><div class="t"><span class="ic"><i class="fa-solid fa-coins"></i></span>(+) إيرادات مختلفة</div><div class="v pos" id="s7">0</div></div>
-        <div class="kpi" style="--c:#059669"><div class="t"><span class="ic"><i class="fa-solid fa-equals"></i></span>(=) الإجمالي بعد الإيرادات</div><div class="v" id="s8">0</div></div>
-        <div class="kpi" style="--c:#e11d48"><div class="t"><span class="ic"><i class="fa-solid fa-receipt"></i></span>(−) إجمالي المصاريف</div><div class="v neg" id="s9">0</div></div>
+      <div class="stmt">
+        <div class="row" style="--rc:#4f46e5"><span class="lb"><i class="fa-solid fa-bag-shopping"></i>(+) إجمالي المبيعات</span><b class="pos" id="s1">0</b></div>
+        <div class="row" style="--rc:#e11d48"><span class="lb"><i class="fa-solid fa-rotate-left"></i>(−) مردودات المبيعات</span><b class="neg" id="s2">0</b></div>
+        <div class="row" style="--rc:#d97706"><span class="lb"><i class="fa-solid fa-tags"></i>(−) الحسم الممنوح</span><b class="neg" id="s3">0</b></div>
+        <div class="row eq" style="--rc:#0d9488"><span class="lb"><i class="fa-solid fa-wallet"></i>(=) صافي المبيعات</span><b id="s4">0</b></div>
+        <div class="row" style="--rc:#be185d"><span class="lb"><i class="fa-solid fa-percent"></i>(−) الحسم المكتسب</span><b class="neg" id="s4b">0</b></div>
+        <div class="row" style="--rc:#ea580c"><span class="lb"><i class="fa-solid fa-boxes-stacked"></i>(−) تكلفة البضاعة المباعة</span><b class="neg" id="s5">0</b></div>
+        <div class="row eq" style="--rc:#b45309"><span class="lb"><i class="fa-solid fa-cart-flatbed"></i>(=) تكلفة المبيعات</span><b id="s5b">0</b></div>
+        <div class="row eq" style="--rc:#7c3aed"><span class="lb"><i class="fa-solid fa-chart-simple"></i>(=) مجمل الدخل</span><b id="s6">0</b></div>
+        <div class="row" style="--rc:#059669"><span class="lb"><i class="fa-solid fa-coins"></i>(+) إيرادات مختلفة</span><b class="pos" id="s7">0</b></div>
+        <div class="row eq" style="--rc:#059669"><span class="lb"><i class="fa-solid fa-equals"></i>(=) الإجمالي بعد الإيرادات</span><b id="s8">0</b></div>
+        <div class="row" style="--rc:#e11d48"><span class="lb"><i class="fa-solid fa-receipt"></i>(−) إجمالي المصاريف</span><b class="neg" id="s9">0</b></div>
+        <div class="total-btn"><span>صافي الدخل النهائي</span><b id="s10">0</b></div>
       </div>
-      <div class="total-btn"><span>صافي الدخل النهائي</span><b id="s10">0</b></div>
     </section>
     <section class="card hidden" id="chartCard" oncontextmenu="return false">
       <div class="card-head">
@@ -331,13 +334,11 @@ function monthsBetween(from,to){
 function monthsInRange(){return monthsBetween(chartFrom,chartTo);}
 function isMonthMode(){return monthsInRange().length>1;}
 
-/* ✅ طيّ/فتح القائمة المحلية بهدوء مع إخفاء تلقائي */
 function localExpand(auto){
   const c=$('#localCard');c.classList.remove('collapsed');
   clearTimeout(localTimer);
   if(auto)localTimer=setTimeout(()=>c.classList.add('collapsed'),4000);
 }
-/* ✅ طيّ/فتح قائمة المستودع */
 function repoShow(auto){
   const c=$('#repoCard');c.classList.remove('hidden');c.classList.remove('collapsed');
   clearTimeout(repoTimer);
@@ -361,7 +362,6 @@ function detailItem(name,icon,rows,net,income){
   return el;
 }
 
-/* ✅ قائمة تحديد الشهر */
 function renderMonthSel(){
   const sel=$('#monthSel');if(!sel||!RAW)return;
   const[mn,mx]=fullRange();if(!mn)return;
@@ -461,12 +461,10 @@ $('#dayBtn').onclick=e=>{e.stopPropagation();const p=$('#dayPop');if(p.classList
 $('#dayClear').onclick=e=>{e.stopPropagation();if(selectedDay){selectedDay=null;toast('تم إلغاء التحديد');renderAll();}closePop();};
 document.addEventListener('click',e=>{const p=$('#dayPop'),b=$('#dayBtn');if(p&&p.classList.contains('open')&&!p.contains(e.target)&&!b.contains(e.target))closePop();});
 
-/* ✅ قائمة تحديد الشهر */
 $('#monthSel').onchange=e=>{
   const v=e.target.value;
   if(v==='all')resetRange();else setMonth(v);
 };
-/* ✅ الأسهم التفاعلية */
 $('#localToggle').onclick=e=>{e.stopPropagation();clearTimeout(localTimer);$('#localCard').classList.toggle('collapsed');};
 $('#localCard').addEventListener('pointerdown',()=>clearTimeout(localTimer));
 $('#repoToggle').onclick=e=>{e.stopPropagation();clearTimeout(repoTimer);$('#repoCard').classList.toggle('collapsed');};
@@ -560,7 +558,7 @@ $('#btnSave').onclick=async()=>{
   try{
     const items=(await idbAll()).sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||''));
     await renderLocal();
-    localExpand(true);   /* ✅ تظهر بهدوء ثم تنطوي بعد 4 ثوانٍ */
+    localExpand(true);
     if(items.length){RAW=deserializeRAW(items[0].data);CURRENT={name:items[0].name};resetRange();}
     else{const files=await refreshRepo();if(files&&files.length)await openURL(files[0].download_url,files[0].name);}
   }catch(e){}
