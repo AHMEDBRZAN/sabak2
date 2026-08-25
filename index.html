@@ -208,11 +208,26 @@ const $=s=>document.querySelector(s);
 const fmt=(n,d=0)=>(isFinite(n)?n:0).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
 const fmtShort=v=>v>=1e6?(v/1e6).toLocaleString('en-US',{maximumFractionDigits:1})+'M':v>=1e3?(v/1e3).toLocaleString('en-US',{maximumFractionDigits:0})+'K':v;
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-const norm=s=>(s||'').replace(/\s+/g,'');
 function cleanName(s){return (s||'').replace(/[\u200E\u200F\u2066\u2067\u2068\u2069\u202A-\u202E\uFEFF]/g,'').trim();}
 
+/* ✅ تطبيع عميق: إزالة الرموز الخفية والتطويل والتشكيل وتوحيد الهمزات */
+function deepNorm(s){
+  return (s||'')
+    .replace(/[\u200E\u200F\u2066\u2067\u2068\u2069\u202A-\u202E\uFEFF\u061C\u200B-\u200D]/g,'')
+    .replace(/\u0640/g,'')
+    .replace(/[\u064B-\u065F\u0670]/g,'')
+    .replace(/[أإآٱ]/g,'ا')
+    .replace(/ى/g,'ي')
+    .replace(/ة/g,'ه')
+    .replace(/\s+/g,'');
+}
+const KW=k=>deepNorm(k);
+const K_WITH=KW('مسحوبات'),K_EARN=KW('مكتسب'),K_TAD=KW('تدوير'),K_RET=KW('مردودات'),K_SALES=KW('المبيعات'),K_DISC=KW('الحسم'),K_COGS=KW('تكلفة البضاعة'),K_INC=KW('ايرادات');
+
 const CATS=[["ايجار بناية","fa-building"],["كهرباء","fa-bolt"],["اشتراك مولد","fa-plug-circle-bolt"],["مصاريف مختلفة","fa-shapes"],["شراء ماء للمحل","fa-droplet"],["شراء قرطاسية متنوعة","fa-pen-ruler"],["شراء منظفات","fa-soap"],["شراء علاليك","fa-box-archive"],["مشتريات المحل","fa-cart-shopping"],["مكافئات تشجيعية","fa-gift"],["اجور نقل","fa-truck-fast"],["مشروبات ساخنة","fa-mug-hot"],["صيانة","fa-screwdriver-wrench"],["اعانة محتاجين","fa-hand-holding-heart"],["عمولة حوالات الشركات","fa-money-bill-transfer"],["زيادة ونقص صندوق","fa-scale-unbalanced"],["اجور الموظفين","fa-users"],["طعام الموظفين","fa-utensils"],["مصاريف تسويق وتطوير","fa-bullhorn"],["ايجار المخزن الخارجي","fa-warehouse"],["اجور توصيل البضاعة","fa-truck"],["اعلام ونشر الشركة","fa-rectangle-ad"],["لاجور تنزيل بضاعة","fa-boxes-stacked"],["عملات نقدية تالفة","fa-money-bill-wave"]];
-const ALIAS={'طعامموظفين':'طعام الموظفين','اجورتوصيلبضاعة':'اجور توصيل البضاعة','اجورتنزيلبضاعة':'لاجور تنزيل بضاعة','عملاتنقديةتالفة':'عملات نقدية تالفة'};
+const CATLOOK={};CATS.forEach(c=>CATLOOK[deepNorm(c[0])]=c[0]);
+const ALIASMAP={};[['طعامموظفين','طعام الموظفين'],['اجورتوصيلبضاعة','اجور توصيل البضاعة'],['اجورتنزيلبضاعة','لاجور تنزيل بضاعة'],['اجورتنزيلبضاعه','لاجور تنزيل بضاعة'],['عملاتنقديهتالفه','عملات نقدية تالفة']].forEach(p=>ALIASMAP[deepNorm(p[0])]=p[1]);
+const catKey=a=>ALIASMAP[a]||CATLOOK[a];
 
 const KNOWN_FILES=[
  '\u200E\u2068من 1الى 8\u2069.xlsx','من 1الى 8.xlsx',
@@ -237,24 +252,26 @@ function ovHide(){$('#overlay').classList.add('hidden');}
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.remove('hidden');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.add('hidden'),2600);}
 function toNum(v){if(typeof v==='number')return v;if(v==null)return 0;const n=parseFloat(String(v).replace(/[,،\s]/g,''));return isFinite(n)?n:0;}
 function toDate(v){if(v instanceof Date)return v;if(typeof v==='number')return new Date(Math.round((v-25569)*864e5));const m=String(v).match(/(\d{4})-(\d{2})-(\d{2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);const d=new Date(v);return isNaN(d)?null:d;}
-function rowsFrom(ws){if(!ws)return[];return XLSX.utils.sheet_to_json(ws,{defval:null}).map(r=>({date:toDate(r['التاريخ']),voucher:r['رقم السند'],type:r['النوع'],debit:toNum(r['مدين']),credit:toNum(r['دائن']),stmt:r['البيان']||'',acc:(r['اسم الحساب']||'').trim()})).filter(r=>r.date);}
+function rowsFrom(ws){if(!ws)return[];return XLSX.utils.sheet_to_json(ws,{defval:null}).map(r=>({date:toDate(r['التاريخ']),voucher:r['رقم السند'],type:r['النوع'],debit:toNum(r['مدين']),credit:toNum(r['دائن']),stmt:r['البيان']||'',acc:(r['اسم الحساب']||'').trim()})).filter(r=>r.date||deepNorm(r.acc));}
 
 function wbToRAW(wb){
   let allRows=[];
   wb.SheetNames.forEach(n=>{const ws=wb.Sheets[n];if(ws)allRows=allRows.concat(rowsFrom(ws));});
-  const lookup={};CATS.forEach(c=>lookup[norm(c[0])]=c[0]);
+  /* تاريخ احتياطي للقيود بدون تاريخ (مثل التدوير) */
+  let fb=null;allRows.forEach(r=>{if(r.date&&(!fb||r.date<fb))fb=r.date;});
+  allRows.forEach(r=>{if(!r.date)r.date=fb||new Date();});
   const res={sales:[],returns:[],discounts:[],cogs:[],otherIncome:[],expenses:[],earned:[]};
   allRows.forEach(r=>{
-    const a=norm(r.acc);
-    if(a.includes('مسحوبات')||a.includes('السيدعباس'))return;
-    if(a.includes('مكتسب')){res.earned.push(r);return;}
-    if(a.includes('تدوير')){res.otherIncome.push(r);return;}
-    if(a.includes('مردودات')){res.returns.push(r);return;}
-    if(a.includes('المبيعات')){res.sales.push(r);return;}
-    if(a.includes('الحسم')){res.discounts.push(r);return;}
-    if(a.includes('تكلفةالبضاعة')){res.cogs.push(r);return;}
-    if(a.includes('ايرادات')||a.includes('إيرادات')){res.otherIncome.push(r);return;}
-    if(ALIAS[a]||lookup[a]){res.expenses.push(r);return;}
+    const a=deepNorm(r.acc),t=deepNorm(r.stmt);
+    if(a.includes(K_WITH)||a.includes(KW('السيد عباس')))return;
+    if(a.includes(K_EARN)){res.earned.push(r);return;}
+    if(a.includes(K_TAD)||t.includes(K_TAD)){res.otherIncome.push(r);return;}   /* ✅ تدوير القيم → إيرادات */
+    if(a.includes(K_RET)){res.returns.push(r);return;}
+    if(a.includes(K_SALES)){res.sales.push(r);return;}
+    if(a.includes(K_DISC)){res.discounts.push(r);return;}
+    if(a.includes(K_COGS)){res.cogs.push(r);return;}
+    if(a.includes(K_INC)){res.otherIncome.push(r);return;}
+    if(catKey(a)){res.expenses.push(r);return;}
   });
   return res;
 }
@@ -272,12 +289,11 @@ function computeStats(from,to){
   const earned=sum(EN,'credit')-sum(EN,'debit');
   const netSales=sales-ret-disc;
   const cogs=sum(C,'debit')-sum(C,'credit');
-  const costOfSales=cogs-earned;          /* تكلفة المبيعات = البضاعة − المكتسب */
-  const gross=netSales-costOfSales;       /* مجمل الدخل = صافي المبيعات − تكلفة المبيعات */
+  const costOfSales=cogs-earned;
+  const gross=netSales-costOfSales;
   const otherIncome=sum(OI,'credit')-sum(OI,'debit');
-  const lookup={};CATS.forEach(c=>lookup[norm(c[0])]=c[0]);
   const catMap={};CATS.forEach(c=>catMap[c[0]]={name:c[0],icon:c[1],amt:0,rows:[]});
-  E.forEach(r=>{let key=ALIAS[norm(r.acc)]||lookup[norm(r.acc)];if(key&&catMap[key]){catMap[key].amt+=r.debit-r.credit;catMap[key].rows.push(r);}});
+  E.forEach(r=>{let key=catKey(deepNorm(r.acc));if(key&&catMap[key]){catMap[key].amt+=r.debit-r.credit;catMap[key].rows.push(r);}});
   const expenses=CATS.reduce((s,c)=>s+catMap[c[0]].amt,0);
   return{sales,ret,disc,earned,netSales,cogs,costOfSales,gross,otherIncome,expenses,net:gross+otherIncome-expenses,catMap,oiRows:OI,enRows:EN,counts:{s:S.length,r:R.length,d:D.length,c:C.length,e:E.length,oi:OI.length,en:EN.length}};
 }
@@ -314,7 +330,7 @@ function renderAll(){
   anim($('#kCogs'),st.cogs);
   anim($('#kCogsNet'),st.costOfSales);
   anim($('#kGross'),st.gross);
-  anim($('#kOther'),st.otherIncome);$('#kOtherS').textContent=st.counts.oi+' قيد (مع تدوير قيم)';
+  anim($('#kOther'),st.otherIncome);$('#kOtherS').textContent=st.counts.oi+' قيد (مع تدوير القيم)';
   anim($('#kExp'),st.expenses);$('#kExpS').textContent=st.counts.e+' سند';
   anim($('#kNetInc'),st.net);
   $('#s1').textContent=fmt(st.sales);$('#s2').textContent=fmt(st.ret);$('#s3').textContent=fmt(st.disc);
