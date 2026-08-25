@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>نظام الحسابات المتكامل</title>
+<title>إدارة الحسابات — شركة فاوري</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -14,11 +14,6 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Cairo',sans-serif}
 body{background:linear-gradient(180deg,#e9edf8,#dfe4f2);min-height:100vh;color:#0f172a;padding-bottom:60px}
 .hidden{display:none!important}
-.topbar{background:rgba(255,255,255,.92);box-shadow:0 4px 20px rgba(15,23,42,.08);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.brand{display:flex;gap:10px;align-items:center}
-.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#4f46e5,#0ea5e9);color:#fff;display:grid;place-items:center;font-size:18px}
-.brand h1{font-size:16px;font-weight:900}
-.brand small{color:#64748b;font-size:10.5px}
 .btn{border:none;border-radius:12px;padding:10px 16px;font-family:'Cairo';font-weight:800;font-size:12.5px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.2s}
 .btn-green{background:#059669;color:#fff}.btn-green:hover{background:#047857}
 .btn-indigo{background:#4f46e5;color:#fff}.btn-indigo:hover{background:#4338ca}
@@ -38,6 +33,16 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .tgl i{transition:.3s}
 .collapsed .tgl i{transform:rotate(180deg)}
 .collapsed{padding:10px 16px}
+/* ✅ الهيدر الجديد: جميل وتفاعلي */
+.top-card{background:linear-gradient(135deg,#eef2ff 0%,#fdf4ff 55%,#ecfeff 100%);border:1px solid #e0e7ff;position:relative;overflow:hidden}
+.top-card::before{content:'';position:absolute;top:-50px;inset-inline-start:-50px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(79,70,229,.16),transparent 70%)}
+.top-card::after{content:'';position:absolute;bottom:-60px;inset-inline-end:-40px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(14,165,233,.14),transparent 70%)}
+.top-card .brand{display:flex;gap:10px;align-items:center;position:relative;z-index:1}
+.top-card .logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#4f46e5,#0ea5e9);color:#fff;display:grid;place-items:center;font-size:18px;box-shadow:0 8px 18px rgba(79,70,229,.35);animation:logoPulse 2.6s ease-in-out infinite}
+@keyframes logoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.top-card h1{font-size:16px;font-weight:900;background:linear-gradient(90deg,#4f46e5,#0ea5e9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.top-card small{color:#64748b;font-size:10.5px}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:12px;position:relative;z-index:1}
 .file-list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
 .file-item{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:12px;display:flex;gap:10px;align-items:center;transition:.2s}
 .file-item:hover{border-color:#c7d2fe;box-shadow:0 6px 16px rgba(79,70,229,.12)}
@@ -58,7 +63,7 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .kpi .ic{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.7);color:var(--c);display:grid;place-items:center;font-size:14px;box-shadow:inset 0 0 0 1.5px var(--c)}
 .kpi .v{font-size:18px;font-weight:900;margin-top:8px}
 .kpi .s{font-size:9.5px;color:#94a3b8;font-weight:700}
-/* ✅ قائمة الدخل: ترتيب عمودي سابق + جماليات جديدة */
+/* ✅ قائمة الدخل: ترتيب عمودي + جماليات */
 .stmt{margin-top:12px;display:flex;flex-direction:column;gap:7px}
 .stmt .row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff;border:1px solid #eef1f8;border-radius:14px;padding:10px 14px;font-size:12.5px;font-weight:800;position:relative;overflow:hidden;transition:.2s}
 .stmt .row::before{content:'';position:absolute;inset-inline-start:0;top:8px;bottom:8px;width:4px;border-radius:4px;background:var(--rc,#94a3b8)}
@@ -122,18 +127,24 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 
 <div id="overlay"><div class="spin"></div><p id="ovText">جارٍ التحميل…</p></div>
 
-<header class="topbar">
-  <div class="brand">
-    <div class="logo"><i class="fa-solid fa-chart-line"></i></div>
-    <div><h1>نظام الحسابات المتكامل</h1><small>المستودع: ahmedbrzan/sabak2</small></div>
-  </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <button id="btnRepo" class="btn btn-indigo"><i class="fa-solid fa-rotate"></i> تحديث من المستودع</button>
-    <button id="btnSave" class="btn btn-green"><i class="fa-solid fa-floppy-disk"></i> حفظ الملف</button>
-  </div>
-</header>
-
 <main>
+  <!-- ✅ الهيدر: جميل + محتوى مخفي + سهم + إغلاق بعد 3 ثوانٍ -->
+  <section class="card top-card collapsed" id="topCard">
+    <div class="card-head">
+      <div class="brand">
+        <div class="logo"><i class="fa-solid fa-chart-line"></i></div>
+        <div><h1>إدارة الحسابات — شركة فاوري</h1><small>المستودع: ahmedbrzan/sabak2</small></div>
+      </div>
+      <button class="btn btn-sm btn-ghost tgl" id="topToggle" title="إظهار/إخفاء"><i class="fa-solid fa-chevron-down"></i></button>
+    </div>
+    <div class="collapse-body"><div class="collapse-inner">
+      <div class="top-actions">
+        <button id="btnRepo" class="btn btn-indigo"><i class="fa-solid fa-rotate"></i> تحديث من المستودع</button>
+        <button id="btnSave" class="btn btn-green"><i class="fa-solid fa-floppy-disk"></i> حفظ الملف</button>
+      </div>
+    </div></div>
+  </section>
+
   <section class="card" id="localCard">
     <div class="card-head">
       <h2><i class="fa-solid fa-folder-open"></i> قائمة الملفات المحفوظة محلياً (الأساسية)</h2>
@@ -169,7 +180,6 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
   </section>
 
   <div class="grid2">
-    <!-- ✅ قائمة الدخل: الترتيب العمودي السابق + تصميم أجمل -->
     <section class="card hidden" id="stmtCard">
       <div class="card-head"><h2><i class="fa-solid fa-file-invoice-dollar"></i> قائمة الدخل</h2></div>
       <div class="stmt">
@@ -250,7 +260,7 @@ const rawUrl=n=>'https://raw.githubusercontent.com/'+REPO+'/main/'+encodeURI(n);
 
 let RAW=null, CURRENT=null, CHART=null;
 let chartFrom=null, chartTo=null, selectedDay=null;
-let repoTimer=null, localTimer=null;
+let repoTimer=null, localTimer=null, topTimer=null;
 
 function idbOpen(){return new Promise((res,rej)=>{const q=indexedDB.open('asbakk-db',1);q.onupgradeneeded=()=>{const db=q.result;if(!db.objectStoreNames.contains('files'))db.createObjectStore('files',{keyPath:'id'});};q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});}
 async function idbAll(){const db=await idbOpen();return new Promise((res,rej)=>{const r=db.transaction('files','readonly').objectStore('files').getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error);});}
@@ -268,6 +278,7 @@ function rowsFrom(ws){if(!ws)return[];return XLSX.utils.sheet_to_json(ws,{defval
 function wbToRAW(wb){
   let allRows=[];
   wb.SheetNames.forEach(n=>{const ws=wb.Sheets[n];if(ws)allRows=allRows.concat(rowsFrom(ws));});
+  /* ✅ إزالة القيود المكررة تماماً */
   const seen=new Set();
   allRows=allRows.filter(r=>{
     const k=[r.date?iso(r.date):'',r.voucher,r.type,r.debit,r.credit,r.stmt,r.acc].join('|');
@@ -334,6 +345,12 @@ function monthsBetween(from,to){
 function monthsInRange(){return monthsBetween(chartFrom,chartTo);}
 function isMonthMode(){return monthsInRange().length>1;}
 
+/* ✅ الهيدر: فتح + إغلاق تلقائي بعد 3 ثوانٍ */
+function topExpand(){
+  const c=$('#topCard');c.classList.remove('collapsed');
+  clearTimeout(topTimer);
+  topTimer=setTimeout(()=>c.classList.add('collapsed'),3000);
+}
 function localExpand(auto){
   const c=$('#localCard');c.classList.remove('collapsed');
   clearTimeout(localTimer);
@@ -461,14 +478,18 @@ $('#dayBtn').onclick=e=>{e.stopPropagation();const p=$('#dayPop');if(p.classList
 $('#dayClear').onclick=e=>{e.stopPropagation();if(selectedDay){selectedDay=null;toast('تم إلغاء التحديد');renderAll();}closePop();};
 document.addEventListener('click',e=>{const p=$('#dayPop'),b=$('#dayBtn');if(p&&p.classList.contains('open')&&!p.contains(e.target)&&!b.contains(e.target))closePop();});
 
-$('#monthSel').onchange=e=>{
-  const v=e.target.value;
-  if(v==='all')resetRange();else setMonth(v);
-};
+/* ✅ الأسهم التفاعلية */
+$('#topToggle').onclick=e=>{e.stopPropagation();clearTimeout(topTimer);const c=$('#topCard');if(c.classList.contains('collapsed'))topExpand();else c.classList.add('collapsed');};
+$('#topCard').addEventListener('pointerdown',()=>clearTimeout(topTimer));
 $('#localToggle').onclick=e=>{e.stopPropagation();clearTimeout(localTimer);$('#localCard').classList.toggle('collapsed');};
 $('#localCard').addEventListener('pointerdown',()=>clearTimeout(localTimer));
 $('#repoToggle').onclick=e=>{e.stopPropagation();clearTimeout(repoTimer);$('#repoCard').classList.toggle('collapsed');};
 $('#repoCard').addEventListener('pointerdown',()=>clearTimeout(repoTimer));
+
+$('#monthSel').onchange=e=>{
+  const v=e.target.value;
+  if(v==='all')resetRange();else setMonth(v);
+};
 
 async function renderLocal(){
   const items=(await idbAll()).sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||''));
