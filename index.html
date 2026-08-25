@@ -210,7 +210,6 @@ const fmtShort=v=>v>=1e6?(v/1e6).toLocaleString('en-US',{maximumFractionDigits:1
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 function cleanName(s){return (s||'').replace(/[\u200E\u200F\u2066\u2067\u2068\u2069\u202A-\u202E\uFEFF]/g,'').trim();}
 
-/* ✅ تطبيع عميق: إزالة الرموز الخفية والتطويل والتشكيل وتوحيد الهمزات */
 function deepNorm(s){
   return (s||'')
     .replace(/[\u200E\u200F\u2066\u2067\u2068\u2069\u202A-\u202E\uFEFF\u061C\u200B-\u200D]/g,'')
@@ -224,9 +223,10 @@ function deepNorm(s){
 const KW=k=>deepNorm(k);
 const K_WITH=KW('مسحوبات'),K_EARN=KW('مكتسب'),K_TAD=KW('تدوير'),K_RET=KW('مردودات'),K_SALES=KW('المبيعات'),K_DISC=KW('الحسم'),K_COGS=KW('تكلفة البضاعة'),K_INC=KW('ايرادات');
 
-const CATS=[["ايجار بناية","fa-building"],["كهرباء","fa-bolt"],["اشتراك مولد","fa-plug-circle-bolt"],["مصاريف مختلفة","fa-shapes"],["شراء ماء للمحل","fa-droplet"],["شراء قرطاسية متنوعة","fa-pen-ruler"],["شراء منظفات","fa-soap"],["شراء علاليك","fa-box-archive"],["مشتريات المحل","fa-cart-shopping"],["مكافئات تشجيعية","fa-gift"],["اجور نقل","fa-truck-fast"],["مشروبات ساخنة","fa-mug-hot"],["صيانة","fa-screwdriver-wrench"],["اعانة محتاجين","fa-hand-holding-heart"],["عمولة حوالات الشركات","fa-money-bill-transfer"],["زيادة ونقص صندوق","fa-scale-unbalanced"],["اجور الموظفين","fa-users"],["طعام الموظفين","fa-utensils"],["مصاريف تسويق وتطوير","fa-bullhorn"],["ايجار المخزن الخارجي","fa-warehouse"],["اجور توصيل البضاعة","fa-truck"],["اعلام ونشر الشركة","fa-rectangle-ad"],["لاجور تنزيل بضاعة","fa-boxes-stacked"],["عملات نقدية تالفة","fa-money-bill-wave"]];
+/* ✅ أُضيفت فئة: ديون معدومة */
+const CATS=[["ايجار بناية","fa-building"],["كهرباء","fa-bolt"],["اشتراك مولد","fa-plug-circle-bolt"],["مصاريف مختلفة","fa-shapes"],["شراء ماء للمحل","fa-droplet"],["شراء قرطاسية متنوعة","fa-pen-ruler"],["شراء منظفات","fa-soap"],["شراء علاليك","fa-box-archive"],["مشتريات المحل","fa-cart-shopping"],["مكافئات تشجيعية","fa-gift"],["اجور نقل","fa-truck-fast"],["مشروبات ساخنة","fa-mug-hot"],["صيانة","fa-screwdriver-wrench"],["اعانة محتاجين","fa-hand-holding-heart"],["عمولة حوالات الشركات","fa-money-bill-transfer"],["زيادة ونقص صندوق","fa-scale-unbalanced"],["اجور الموظفين","fa-users"],["طعام الموظفين","fa-utensils"],["مصاريف تسويق وتطوير","fa-bullhorn"],["ايجار المخزن الخارجي","fa-warehouse"],["اجور توصيل البضاعة","fa-truck"],["اعلام ونشر الشركة","fa-rectangle-ad"],["لاجور تنزيل بضاعة","fa-boxes-stacked"],["عملات نقدية تالفة","fa-money-bill-wave"],["ديون معدومة","fa-ban"]];
 const CATLOOK={};CATS.forEach(c=>CATLOOK[deepNorm(c[0])]=c[0]);
-const ALIASMAP={};[['طعامموظفين','طعام الموظفين'],['اجورتوصيلبضاعة','اجور توصيل البضاعة'],['اجورتنزيلبضاعة','لاجور تنزيل بضاعة'],['اجورتنزيلبضاعه','لاجور تنزيل بضاعة'],['عملاتنقديهتالفه','عملات نقدية تالفة']].forEach(p=>ALIASMAP[deepNorm(p[0])]=p[1]);
+const ALIASMAP={};[['طعامموظفين','طعام الموظفين'],['اجورتوصيلبضاعة','اجور توصيل البضاعة'],['اجورتنزيلبضاعة','لاجور تنزيل بضاعة'],['اجورتنزيلبضاعه','لاجور تنزيل بضاعة'],['عملاتنقديهتالفه','عملات نقدية تالفة'],['ديونمعدومه','ديون معدومة']].forEach(p=>ALIASMAP[deepNorm(p[0])]=p[1]);
 const catKey=a=>ALIASMAP[a]||CATLOOK[a];
 
 const KNOWN_FILES=[
@@ -257,7 +257,6 @@ function rowsFrom(ws){if(!ws)return[];return XLSX.utils.sheet_to_json(ws,{defval
 function wbToRAW(wb){
   let allRows=[];
   wb.SheetNames.forEach(n=>{const ws=wb.Sheets[n];if(ws)allRows=allRows.concat(rowsFrom(ws));});
-  /* تاريخ احتياطي للقيود بدون تاريخ (مثل التدوير) */
   let fb=null;allRows.forEach(r=>{if(r.date&&(!fb||r.date<fb))fb=r.date;});
   allRows.forEach(r=>{if(!r.date)r.date=fb||new Date();});
   const res={sales:[],returns:[],discounts:[],cogs:[],otherIncome:[],expenses:[],earned:[]};
@@ -265,13 +264,13 @@ function wbToRAW(wb){
     const a=deepNorm(r.acc),t=deepNorm(r.stmt);
     if(a.includes(K_WITH)||a.includes(KW('السيد عباس')))return;
     if(a.includes(K_EARN)){res.earned.push(r);return;}
-    if(a.includes(K_TAD)||t.includes(K_TAD)){res.otherIncome.push(r);return;}   /* ✅ تدوير القيم → إيرادات */
+    if(a.includes(K_TAD)||t.includes(K_TAD)){res.otherIncome.push(r);return;}
     if(a.includes(K_RET)){res.returns.push(r);return;}
     if(a.includes(K_SALES)){res.sales.push(r);return;}
     if(a.includes(K_DISC)){res.discounts.push(r);return;}
     if(a.includes(K_COGS)){res.cogs.push(r);return;}
     if(a.includes(K_INC)){res.otherIncome.push(r);return;}
-    if(catKey(a)){res.expenses.push(r);return;}
+    if(catKey(a)){res.expenses.push(r);return;}   /* ✅ ديون معدومة تدخل هنا كمصاريف */
   });
   return res;
 }
