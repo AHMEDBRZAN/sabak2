@@ -33,9 +33,8 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .tgl i{transition:.3s}
 .collapsed .tgl i{transform:rotate(180deg)}
 .collapsed{padding:10px 16px}
-/* ✅ الهيدر */
 .top-card{background:linear-gradient(135deg,#eef2ff 0%,#fdf4ff 55%,#ecfeff 100%);border:1px solid #e0e7ff;position:relative;overflow:hidden}
-.top-card::before,.top-card::after{pointer-events:none}   /* ✅ إصلاح زر الفتح */
+.top-card::before,.top-card::after{pointer-events:none}
 .top-card::before{content:'';position:absolute;top:-50px;inset-inline-start:-50px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(79,70,229,.16),transparent 70%)}
 .top-card::after{content:'';position:absolute;bottom:-60px;inset-inline-end:-40px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(14,165,233,.14),transparent 70%)}
 .top-card .brand{display:flex;gap:10px;align-items:center;position:relative;z-index:1}
@@ -51,7 +50,6 @@ main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:col
 .fi-icon.repo{background:#eef2ff;color:#4f46e5}
 .fi-info{flex:1;min-width:0}
 .fi-info b{display:block;font-size:13px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* ✅ شارات مرتبة: تاريخ آخر حفظ + صافي الربح فقط */
 .fi-mini{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .fi-mini .bd{font-style:normal;display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 11px;font-size:10px;font-weight:800}
 .bd.date{background:#eef2ff;color:#4f46e5}
@@ -362,10 +360,13 @@ function repoShow(auto){
   if(auto)repoTimer=setTimeout(()=>c.classList.add('collapsed'),3000);
 }
 
+/* ✅ تقبل أي شهر مباشرة (حتى بدون قيود) */
 function setMonth(key){
-  const[mn,mx]=fullRange();if(!mn)return;
-  const m=monthsBetween(mn,mx).find(x=>x.key===key);if(!m)return;
-  chartFrom=m.from;chartTo=m.to;selectedDay=null;renderAll();
+  const p=String(key).split('-');const y=+p[0],m=+p[1];
+  if(!y||!m)return;
+  chartFrom=new Date(y,m-1,1);
+  chartTo=new Date(y,m,0,23,59,59);
+  selectedDay=null;renderAll();
 }
 
 function detailItem(name,icon,rows,net,income){
@@ -379,13 +380,22 @@ function detailItem(name,icon,rows,net,income){
   return el;
 }
 
+/* ✅ جميع أشهر السنة لكل سنة بالبيانات */
 function renderMonthSel(){
   const sel=$('#monthSel');if(!sel||!RAW)return;
   const[mn,mx]=fullRange();if(!mn)return;
-  const ms=monthsBetween(mn,mx);
-  const f=iso(chartFrom),t=iso(chartTo);
-  const cur=(ms.find(m=>iso(m.from)===f&&iso(m.to)===t)||{}).key||'all';
-  sel.innerHTML='<option value="all">📅 الكل (الفترة كاملة)</option>'+ms.map(m=>'<option value="'+m.key+'">شهر '+m.key+'</option>').join('');
+  let opts='';
+  for(let y=mn.getFullYear();y<=mx.getFullYear();y++){
+    for(let m=1;m<=12;m++){
+      const key=y+'-'+String(m).padStart(2,'0');
+      opts+='<option value="'+key+'">شهر '+key+'</option>';
+    }
+  }
+  sel.innerHTML='<option value="all">📅 الكل (الفترة كاملة)</option>'+opts;
+  let cur='all';
+  const y=chartFrom.getFullYear(),m=chartFrom.getMonth()+1;
+  const key=y+'-'+String(m).padStart(2,'0');
+  if(chartFrom.getDate()===1&&iso(chartTo)===iso(new Date(y,m,0,23,59,59)))cur=key;
   sel.value=cur;
 }
 
@@ -478,7 +488,6 @@ $('#dayBtn').onclick=e=>{e.stopPropagation();const p=$('#dayPop');if(p.classList
 $('#dayClear').onclick=e=>{e.stopPropagation();if(selectedDay){selectedDay=null;toast('تم إلغاء التحديد');renderAll();}closePop();};
 document.addEventListener('click',e=>{const p=$('#dayPop'),b=$('#dayBtn');if(p&&p.classList.contains('open')&&!p.contains(e.target)&&!b.contains(e.target))closePop();});
 
-/* ✅ الأسهم التفاعلية */
 $('#topToggle').onclick=e=>{e.stopPropagation();clearTimeout(topTimer);const c=$('#topCard');if(c.classList.contains('collapsed'))topExpand();else c.classList.add('collapsed');};
 $('#topCard').addEventListener('pointerdown',()=>clearTimeout(topTimer));
 $('#localToggle').onclick=e=>{e.stopPropagation();clearTimeout(localTimer);$('#localCard').classList.toggle('collapsed');};
@@ -491,7 +500,6 @@ $('#monthSel').onchange=e=>{
   if(v==='all')resetRange();else setMonth(v);
 };
 
-/* ✅ بطاقة ملف مرتبة: الاسم + تاريخ آخر حفظ + صافي الربح فقط */
 async function renderLocal(){
   const items=(await idbAll()).sort((a,b)=>(b.savedAt||'').localeCompare(a.savedAt||''));
   const box=$('#localList');
