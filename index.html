@@ -245,9 +245,10 @@ function deepNorm(s){
 const KW=k=>deepNorm(k);
 const K_WITH=KW('مسحوبات'),K_EARN=KW('مكتسب'),K_TAD=KW('تدوير'),K_RET=KW('مردودات'),K_SALES=KW('المبيعات'),K_DISC=KW('الحسم'),K_COGS=KW('تكلفة البضاعة'),K_INC=KW('ايرادات');
 
-const CATS=[["ايجار بناية","fa-building"],["كهرباء","fa-bolt"],["اشتراك مولد","fa-plug-circle-bolt"],["مصاريف مختلفة","fa-shapes"],["شراء ماء للمحل","fa-droplet"],["شراء قرطاسية متنوعة","fa-pen-ruler"],["شراء منظفات","fa-soap"],["شراء علاليك","fa-box-archive"],["مشتريات المحل","fa-cart-shopping"],["مكافئات تشجيعية","fa-gift"],["اجور نقل","fa-truck-fast"],["مشروبات ساخنة","fa-mug-hot"],["صيانة","fa-screwdriver-wrench"],["اعانة محتاجين","fa-hand-holding-heart"],["عمولة حوالات الشركات","fa-money-bill-transfer"],["زيادة ونقص صندوق","fa-scale-unbalanced"],["اجور الموظفين","fa-users"],["طعام الموظفين","fa-utensils"],["مصاريف تسويق وتطوير","fa-bullhorn"],["ايجار المخزن الخارجي","fa-warehouse"],["اجور توصيل البضاعة","fa-truck"],["اعلام ونشر الشركة","fa-rectangle-ad"],["لاجور تنزيل بضاعة","fa-boxes-stacked"],["عملات نقدية تالفة","fa-money-bill-wave"],["ديون معدومة","fa-ban"]];
+/* ✅ أُضيفت فئة: ضيافة */
+const CATS=[["ايجار بناية","fa-building"],["كهرباء","fa-bolt"],["اشتراك مولد","fa-plug-circle-bolt"],["مصاريف مختلفة","fa-shapes"],["شراء ماء للمحل","fa-droplet"],["شراء قرطاسية متنوعة","fa-pen-ruler"],["شراء منظفات","fa-soap"],["شراء علاليك","fa-box-archive"],["مشتريات المحل","fa-cart-shopping"],["مكافئات تشجيعية","fa-gift"],["اجور نقل","fa-truck-fast"],["مشروبات ساخنة","fa-mug-hot"],["صيانة","fa-screwdriver-wrench"],["اعانة محتاجين","fa-hand-holding-heart"],["عمولة حوالات الشركات","fa-money-bill-transfer"],["زيادة ونقص صندوق","fa-scale-unbalanced"],["اجور الموظفين","fa-users"],["طعام الموظفين","fa-utensils"],["مصاريف تسويق وتطوير","fa-bullhorn"],["ايجار المخزن الخارجي","fa-warehouse"],["اجور توصيل البضاعة","fa-truck"],["اعلام ونشر الشركة","fa-rectangle-ad"],["لاجور تنزيل بضاعة","fa-boxes-stacked"],["عملات نقدية تالفة","fa-money-bill-wave"],["ديون معدومة","fa-ban"],["ضيافة","fa-champagne-glasses"]];
 const CATLOOK={};CATS.forEach(c=>CATLOOK[deepNorm(c[0])]=c[0]);
-const ALIASMAP={};[['طعامموظفين','طعام الموظفين'],['اجورتوصيلبضاعة','اجور توصيل البضاعة'],['اجورتنزيلبضاعة','لاجور تنزيل بضاعة'],['اجورتنزيلبضاعه','لاجور تنزيل بضاعة'],['عملاتنقديهتالفه','عملات نقدية تالفة'],['ديونمعدومه','ديون معدومة']].forEach(p=>ALIASMAP[deepNorm(p[0])]=p[1]);
+const ALIASMAP={};[['طعامموظفين','طعام الموظفين'],['اجورتوصيلبضاعة','اجور توصيل البضاعة'],['اجورتنزيلبضاعة','لاجور تنزيل بضاعة'],['اجورتنزيلبضاعه','لاجور تنزيل بضاعة'],['عملاتنقديهتالفه','عملات نقدية تالفة'],['ديونمعدومه','ديون معدومة'],['ضيافه','ضيافة']].forEach(p=>ALIASMAP[deepNorm(p[0])]=p[1]);
 const catKey=a=>ALIASMAP[a]||CATLOOK[a];
 
 const KNOWN_FILES=[
@@ -297,7 +298,7 @@ function wbToRAW(wb){
     if(a.includes(K_DISC)){res.discounts.push(r);return;}
     if(a.includes(K_COGS)){res.cogs.push(r);return;}
     if(a.includes(K_INC)){res.otherIncome.push(r);return;}
-    if(catKey(a)){res.expenses.push(r);return;}
+    if(catKey(a)){res.expenses.push(r);return;}   /* ✅ ضيافة تدخل هنا */
   });
   return res;
 }
@@ -360,7 +361,6 @@ function repoShow(auto){
   if(auto)repoTimer=setTimeout(()=>c.classList.add('collapsed'),3000);
 }
 
-/* ✅ تقبل أي شهر مباشرة (حتى بدون قيود) */
 function setMonth(key){
   const p=String(key).split('-');const y=+p[0],m=+p[1];
   if(!y||!m)return;
@@ -380,7 +380,6 @@ function detailItem(name,icon,rows,net,income){
   return el;
 }
 
-/* ✅ جميع أشهر السنة لكل سنة بالبيانات */
 function renderMonthSel(){
   const sel=$('#monthSel');if(!sel||!RAW)return;
   const[mn,mx]=fullRange();if(!mn)return;
